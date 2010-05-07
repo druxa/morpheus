@@ -1,0 +1,36 @@
+libmorpheus-perl (0.1.4) stable; urgency=low
+
+  * cross dependencies solved and tested, plugins initialization simplified 
+  * sub-only globes ignored
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 07 May 2010 20:52:25 +0400
+
+libmorpheus-perl (0.1.3) stable; urgency=low
+
+  * allow globs as configuration values: load them from file configs and
+    export to local variables properly
+  * fix export of optional variables (?$X)
+  * Plugins renamed to Plugin
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Tue, 04 May 2010 18:28:18 +0400
+
+libmorpheus-perl (0.1.2) stable; urgency=low
+
+  * bootstrap procedure for Env plugin
+  * export 'morph' by default
+  * support /etc/stream/
+  * tainted mode is no longer supported
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Thu, 29 Apr 2010 14:32:22 +0400
+
+libmorpheus-perl (0.1.1) stable; urgency=low
+
+  * vars exporting
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Mon, 26 Apr 2010 18:46:41 +0400
+
+libmorpheus-perl (0.1.0) stable; urgency=low
+
+  * Initial Release.
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 23 Apr 2010 12:42:14 +0400
