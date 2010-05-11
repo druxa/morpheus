@@ -11,13 +11,13 @@ sub config_path {
 
 sub list ($$) {
     my ($class, $ns) = @_;
-    return ("morpheus.plugin.file.options.path") if "morpheus.plugin.file.options.path." =~ /^\Q$ns.\E/;
+    return ("morpheus/plugin/file/options/path") if "morpheus/plugin/file/options/path/" =~ m{^\Q$ns/\E};
     return ();
 }
 
 sub morph ($$) {
     my ($class, $ns) = @_;
-    if ($ns eq "morpheus.plugin.file.options.path") {
+    if ($ns eq "morpheus/plugin/file/options/path") {
         our @config_path = config_path() unless @config_path;
         return [@config_path];
     }
@@ -36,7 +36,7 @@ my @config_path;
 sub _package($) {
     my ($ns) = @_;
     my $md5 = md5_hex(__PACKAGE__, $ns);
-    $ns =~ s/[\.\-]/_/g;
+    $ns =~ s/[^\w]/_/g;
     return __PACKAGE__."::Package::${ns}_${md5}";
 }
 
@@ -104,12 +104,11 @@ sub _get ($) {
 sub _find_file($) {
     my ($ns) = @_;
     my $config = $ns;
-    $config =~ s#\.#/#g;
     my $file;
 
     for my $config_path (@config_path) {
         my @suffix = (qw(.cfg .conf));
-        @suffix = ("") if ($ns =~ /^stream\./);
+        @suffix = ("") if ($ns =~ m{^stream/});
         for my $suffix (@suffix) {
             $file = "$config_path/$config$suffix";
             return $file if -e $file;
@@ -119,17 +118,15 @@ sub _find_file($) {
 }
 
 sub list ($$) {
-    my ($class, $ns) = @_;
+    my ($class, $main_ns) = @_;
 
-    @config_path = @{Morpheus::morph("morpheus.plugin.file.options.path")}
+    @config_path = @{Morpheus::morph("morpheus/plugin/file/options/path")}
         unless @config_path; #FIXME: move caching to Morpheus.pm itself
 
-    my @parts = split /\./, $ns;
-    my $dir = join "/", @parts;
     my %list;
     for my $config_path (@config_path) {
         $config_path =~ s{/+$}{};
-        if (-d "$config_path/$dir") {
+        if (-d "$config_path/$main_ns") {
             find({
                 no_chdir => 1,
                 follow_skip => 2,
@@ -143,15 +140,15 @@ sub list ($$) {
                     die "mystery: $ns" unless _find_file($ns);
                     $list{$ns} = 1;
                 }
-            }, "$config_path/$dir");
+            }, "$config_path/$main_ns");
         }
     }
     my @list = keys %list;
-    
-    while (@parts) {
-        my $ns = join ".", @parts;
+   
+    my $ns = $main_ns;
+    while ($ns) {
         push @list, $ns if _find_file($ns);
-        pop @parts;
+        $ns =~ s{/?[^/]+$}{};
     }
 
     return @list;

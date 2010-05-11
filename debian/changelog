@@ -1,3 +1,9 @@
+libmorpheus-perl (0.2.0) stable; urgency=low
+
+  * namespaces now are / separated
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Tue, 11 May 2010 21:41:21 +0400
+
 libmorpheus-perl (0.1.5) stable; urgency=low
 
   * 'super' made accessible

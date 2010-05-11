@@ -10,19 +10,17 @@ use Data::Dumper;
 
 #
 # use Morpheus -defaults => {
-#   "foo.bar" => { x => 1, y => 2 },
-#   "bar.baz" => "abc",
+#   "foo/bar" => { x => 1, y => 2 },
+#   "bar/baz" => "abc",
 # }, -overrides => {
-#   "baz.foo" => { "x.y" => 3 },
-# }, "x.y.z" => [
+#   "baz/foo" => { "x/y" => 3 },
+# }, "x/y/z" => [
 #   qw($V1 $V2 @V3 %V4),
-#   "v5" => "$V5", "v6.a" => "$A", "v6.b" => "$B",
+#   "v5" => "$V5", "v6/a" => "$A", "v6/b" => "$B",
 #   "v7" => [ "$C", "$D", "e" => "@E" ],
 # ], -export => [
 #   qw(morph normalize merge)
 # ];
-#
-#
 #
 
 sub import ($;@) {
@@ -74,7 +72,7 @@ sub normalize ($) {
     my ($data) = @_;
     return unless ref $data eq "HASH";
     for my $key ( keys %$data) {
-        my @keys = split /\./, $key;
+        my @keys = split m{/+}, $key;
         normalize($data->{$key});
         next if @keys == 1;
 
@@ -82,7 +80,7 @@ sub normalize ($) {
         my $p = my $patch = {};
         $p = $p->{$_} = {} for splice @keys, 0, -1;
         merge($p->{$keys[0]}, $value);
-        # {"a.b.c"=>"d"} -> {a=>{b=>{c=>"d"}}}
+        # {"a/b/c"=>"d"} -> {a=>{b=>{c=>"d"}}}
 
         merge($data, $patch);
     }
@@ -91,7 +89,7 @@ sub normalize ($) {
 sub adjust ($$) {
     my ($value, $delta) = @_;
     return $value unless $delta;
-    for (split /\./, $delta) {
+    for (split m{/+}, $delta) {
         return undef unless defined $value and ref $value eq "HASH";
         $value = $value->{$_};
     }
@@ -117,7 +115,7 @@ sub merge ($$) {
 sub export ($$;$) {
     my ($package, $bindings, $root) = @_;
 
-    $root .= "." if $root and $root !~ /\.$/;
+    $root .= "/" if $root and $root !~ m{/$};
     
     # bindings format:
     # ["$X", ...] 
@@ -227,18 +225,19 @@ sub morph (;$) {
             if (length $main_ns > length $ns) {
                 substr($main_ns, 0, length $ns) eq $ns or die;
                 my $delta = substr($main_ns, length $ns);
-                $delta =~ s/^\.//;
+                $delta =~ s{^/}{};
                 normalize($patch);
                 $patch = adjust($patch, $delta); 
             } else {
                 substr($ns, 0, length $main_ns) eq $main_ns or die;
                 my $delta = substr($ns, length $main_ns);
-                $delta =~ s/^\.//;
+                $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;
                 normalize($patch);
             }
 
-            merge($value, $patch); #TODO: stop when $morphy is defined and is not a hash.
+            merge($value, $patch); 
+            return $value if defined $value and ref $value ne 'HASH';
         }
     }
     return $value;
