@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 18;
+use Test::More tests => 20;
 use Test::Exception;
 
 use lib 'lib';
@@ -29,6 +29,9 @@ is(morph("test/file/stash/override/path"), 2, "File: earlier path overrides");
 
 is(morph("test/file/stash/slave"), 2, "File: resursive dependencies are resolved");
 is(morph("test/file/stash/super"), 2, "File: previous value is accessible within a nested file overriding");
+
+is(morph("test/file")->{stash}->{scalar}, 1, "File: lower config files found");
+is(morph("test/file/stash/hash/1"), 2, "File: higher config files found");
 
 is_deeply(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw(@x)]; [@x]#)), [1,2], "@/% collision => @");
 is_deeply(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw(%x)]; return {%x}#)), {a=>"b"}, "@/% collision => %");

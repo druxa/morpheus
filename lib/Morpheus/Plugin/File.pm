@@ -135,8 +135,6 @@ sub list ($$) {
                     die unless $File::Find::name =~ m{^\Q$config_path\E/(.*)};
                     my $ns = $1;
                     return unless $ns =~ m{^stream/} or $ns =~ s{\.(?:cfg|conf)$}{};
-                    return if $ns =~ /\./;
-                    $ns =~ s#/#.#g;
                     die "mystery: $ns" unless _find_file($ns);
                     $list{$ns} = 1;
                 }
