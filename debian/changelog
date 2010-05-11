@@ -1,3 +1,9 @@
+libmorpheus-perl (0.1.5) stable; urgency=low
+
+  * 'super' made accessible
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Tue, 11 May 2010 21:05:02 +0400
+
 libmorpheus-perl (0.1.4) stable; urgency=low
 
   * cross dependencies solved and tested, plugins initialization simplified 

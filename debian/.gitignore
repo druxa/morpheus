@@ -1,9 +1,7 @@
-/libyandex-db-perl.prerm.debhelper
-/libyandex-ppb-db-perl.substvars
-/libyandex-db-perl.postinst.debhelper
+/*.debhelper
+/*.debhelper.log
+/*.substvars
+/stamp-makefile-build
 /files
-/libyandex-db-perl.substvars
 /tmp
-/libyandex-ppb-db-perl
-/libyandex-db-perl.postrm.debhelper
-/libyandex-db-perl
+/libmorpheus-perl

@@ -210,14 +210,19 @@ sub morph (;$) {
 
     for my $plugin (plugins()) {
 
-        next if $stack->{$main_ns} and $stack->{$main_ns}->{$plugin};
-        local $stack->{$main_ns}->{$plugin} = 1;
-
-        my @list = $plugin->list($main_ns);
+        my @list = do {
+            next if $stack->{"$plugin\0$main_ns"};
+            local $stack->{"$plugin\0$main_ns"} = 1;
+            $plugin->list($main_ns);
+        };
         @list = sort {length $b <=> length $a} @list;
         for my $ns (@list) {
-            
-            my $patch = $plugin->morph($ns);
+
+            my $patch = do {
+                next if $stack->{"$plugin\0$main_ns\0$ns"};
+                local $stack->{"$plugin\0$main_ns\0$ns"} = 1;
+                $plugin->morph($ns);
+            };
 
             if (length $main_ns > length $ns) {
                 substr($main_ns, 0, length $ns) eq $ns or die;

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 17;
+use Test::More tests => 18;
 use Test::Exception;
 
 use lib 'lib';
@@ -28,6 +28,7 @@ is(morph("test.file.stash.override.file.implicit"), 2, "File: nested file overri
 is(morph("test.file.stash.override.path"), 2, "File: earlier path overrides");
 
 is(morph("test.file.stash.slave"), 2, "File: resursive dependencies are resolved");
+is(morph("test.file.stash.super"), 2, "File: previous value is accessible within a nested file overriding");
 
 is_deeply(scalar(eval(q#package X; use Morpheus "test.file.collision" => [qw(@x)]; [@x]#)), [1,2], "@/% collision => @");
 is_deeply(scalar(eval(q#package X; use Morpheus "test.file.collision" => [qw(%x)]; return {%x}#)), {a=>"b"}, "@/% collision => %");
