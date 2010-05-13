@@ -88,14 +88,10 @@ sub _get ($) {
     for (keys %{"${package}::"}) {
         next unless $_;
         my $glob = ${"${package}::"}{$_};
-        my @values;
-        push @values, ${$glob} if defined ${$glob};
-        push @values, \@{$glob} if defined *{$glob}{ARRAY};
-        push @values, \%{$glob} if defined *{$glob}{HASH};
-        if (@values == 1) {
-            ($value->{$_}) = @values;
-        } elsif (@values > 1) {
-            ($value->{$_}) = \*{$glob}; # omg!
+        if (defined *{$glob}{ARRAY} or defined *{$glob}{HASH}) {
+            $value->{$_} = \*{$glob};
+        } elsif (defined ${$glob}) {
+            $value->{$_} = ${$glob};
         }
     }
     return $value;

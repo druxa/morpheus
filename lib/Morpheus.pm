@@ -2,7 +2,7 @@ package Morpheus;
 use strict;
 sub normalize ($);
 sub merge ($$);
-sub morph (;$);
+sub morph ($;$);
 sub export ($$;$);
 
 use Data::Dumper;
@@ -90,8 +90,13 @@ sub adjust ($$) {
     my ($value, $delta) = @_;
     return $value unless $delta;
     for (split m{/+}, $delta) {
-        return undef unless defined $value and ref $value eq "HASH";
-        $value = $value->{$_};
+        if (defined $value and ref $value eq "HASH") {
+            $value = $value->{$_};
+        } elsif (defined $value and ref $value eq "GLOB") {
+            $value = ${*$value}{$_};
+        } else {
+            return undef;
+        }
     }
     return $value;
 }
@@ -105,6 +110,14 @@ sub merge ($$) {
         $_[0] = $patch;
         return;
     }
+
+    if (ref $value eq "GLOB" and *{$value}{HASH}) {
+        $value = \%{*{$value}};
+    }
+    if (ref $patch eq "GLOB" and *{$patch}{HASH}) {
+        $patch = \%{*{$patch}};
+    }
+
     return unless defined $patch and ref $value eq "HASH" and ref $patch eq "HASH";
     
     for my $key (keys %$patch) {
@@ -200,12 +213,13 @@ sub export ($$;$) {
 
 our $stack = {};
 
-sub morph (;$) {
-    my ($main_ns) = @_;
+sub morph ($;$) {
+    my ($main_ns, $type) = @_;
 
     $main_ns ||= "";
     my $value;
 
+    OUTER:
     for my $plugin (plugins()) {
 
         my @list = do {
@@ -237,10 +251,22 @@ sub morph (;$) {
             }
 
             merge($value, $patch); 
-            return $value if defined $value and ref $value ne 'HASH';
+            last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB';
         }
     }
-    return $value;
+    if ($type and ref $value eq "GLOB") {
+        if ($type eq '$') {
+            return ${*{$value}};
+        } elsif ($type eq '@') {
+            return \@{*{$value}};
+        } elsif ($type eq '%') {
+            return \%{*{$value}};
+        } else {
+            die "invalid type value '$type'"
+        }
+    } else {
+        return $value;
+    }
 }
 
 1;

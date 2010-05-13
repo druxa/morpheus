@@ -13,8 +13,8 @@ use Morpheus -overrides => {
 };
 
 is(morph("test/file/stash/scalar"), 1, "File: scalars from stash");
-is_deeply(morph("test/file/stash/array"), [1,2], "File: arrays from stash");
-is_deeply(morph("test/file/stash/hash"), {1=>2,3=>4}, "File: hashes from stash");
+is_deeply(morph("test/file/stash/array", '@'), [1,2], "File: arrays from stash");
+is_deeply(morph("test/file/stash/hash", '%'), {1=>2,3=>4}, "File: hashes from stash");
 
 is(morph("test/file/stash/normalize/x/y"), 1, "File: normalize stash");
 
