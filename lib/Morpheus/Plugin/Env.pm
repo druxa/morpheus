@@ -13,12 +13,14 @@ sub morph ($$) {
     our $data;
     unless (defined $data) {
         $data = {};
-        my @data = eval "package Morpheus::Plugin::Env::Sandbox; $ENV{MORPHEUS}";
-        die $@ if $@;
-        if (@data == 1) {
-           ($data) = @data;
-        } else {
-            $data = {@data};
+        if (defined $ENV{MORPHEUS}) {
+            my @data = eval "package Morpheus::Plugin::Env::Sandbox; $ENV{MORPHEUS}";
+            die $@ if $@;
+            if (@data == 1) {
+               ($data) = @data;
+            } else {
+                $data = {@data};
+            }
         }
     }
 
