@@ -1,29 +1,3 @@
-package Morpheus::Plugin::File::Path;
-use strict;
-
-sub config_path {
-    my $path = "./etc:/etc";
-    $path = "$ENV{CONFIG_PATH}:$path" if $ENV{CONFIG_PATH};
-    my @path = grep {$_} split /[:\s]+/, $path;
-    s{/+$}{} for @path;
-    return @path;
-}
-
-sub list ($$) {
-    my ($class, $ns) = @_;
-    return ("morpheus/plugin/file/options/path") if "morpheus/plugin/file/options/path/" =~ m{^\Q$ns/\E};
-    return ();
-}
-
-sub morph ($$) {
-    my ($class, $ns) = @_;
-    if ($ns eq "morpheus/plugin/file/options/path") {
-        our @config_path = config_path() unless @config_path;
-        return [@config_path];
-    }
-    return undef;
-}
-
 package Morpheus::Plugin::File;
 use strict;
 
@@ -43,7 +17,7 @@ sub _package($) {
 sub content ($) {
     my ($ns) = @_;
     my $file = _find_file($ns);
-    open my $fh, "<$file" or die "open $file failed: $!";
+    open my $fh, "<", "$file" or die "open $file failed: $!";
     my $content = do { local $/; <$fh> };
     close $fh or die "close failed: $!";
     return ($file => $content);
@@ -82,12 +56,12 @@ sub _get ($) {
     return $cache{$ns} if defined $cache{$ns};
 
     # maybe a partially evaluated config block
-    no strict 'refs';
-    my $value;
     my $package = _package($ns);
-    for (keys %{"${package}::"}) {
+    my $stash = do { no strict 'refs'; \%{"${package}::"} };
+    my $value;
+    for (keys %$stash) {
         next unless $_;
-        my $glob = ${"${package}::"}{$_};
+        my $glob = $stash->{$_};
         if (defined *{$glob}{ARRAY} or defined *{$glob}{HASH}) {
             $value->{$_} = \*{$glob};
         } elsif (defined ${$glob}) {
@@ -138,7 +112,7 @@ sub list ($$) {
         }
     }
     my @list = keys %list;
-   
+
     my $ns = $main_ns;
     while ($ns) {
         push @list, $ns if _find_file($ns);

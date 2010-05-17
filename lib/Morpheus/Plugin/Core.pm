@@ -9,9 +9,10 @@ sub list {
 
 sub morph ($$) {
     my ($class, $ns) = @_;
-    return undef if $ns;
+    return (undef) if $ns;
 
-    our $data = {
+    our $data;
+    $data = {
         'system' => {
             hostname => hostname(),
             script => $0,

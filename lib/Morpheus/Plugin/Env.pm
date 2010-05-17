@@ -8,7 +8,7 @@ sub list ($$) {
 
 sub morph ($$) {
     my ($class, $ns) = @_;
-    return undef unless $ns eq "";
+    return (undef) unless $ns eq "";
 
     our $data;
     unless (defined $data) {

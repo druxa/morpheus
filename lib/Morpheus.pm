@@ -53,13 +53,14 @@ use Morpheus::Plugin::Core;
 use Morpheus::Plugin::Env;
 
 use Morpheus::Plugin::File;
+use Morpheus::Plugin::File::Path;
 
 #use Morpheus::Plugins::DB;
 
- 
+
 sub plugins {
     return (
-        "Morpheus::Overrides", 
+        "Morpheus::Overrides",
         "Morpheus::Plugin::Env",
         "Morpheus::Plugin::File::Path",
         "Morpheus::Plugin::File",
@@ -95,7 +96,7 @@ sub adjust ($$) {
         } elsif (defined $value and ref $value eq "GLOB") {
             $value = ${*$value}{$_};
         } else {
-            return undef;
+            return (undef);
         }
     }
     return $value;
@@ -119,7 +120,7 @@ sub merge ($$) {
     }
 
     return unless defined $patch and ref $value eq "HASH" and ref $patch eq "HASH";
-    
+
     for my $key (keys %$patch) {
         merge($value->{$key}, $patch->{$key});
     }
@@ -129,9 +130,9 @@ sub export ($$;$) {
     my ($package, $bindings, $root) = @_;
 
     $root .= "/" if $root and $root !~ m{/$};
-    
+
     # bindings format:
-    # ["$X", ...] 
+    # ["$X", ...]
     # ["@X", ...]
     # ["%X", ...]
     # ["x" => "X", ...]
@@ -158,12 +159,12 @@ sub export ($$;$) {
                 $var =~ s/^(\?)// and $optional = $1;
                 $type = '$';
                 $var =~ s/^([\$\@\%])// and $type = $1;
-            } 
+            }
         }
 
         die "'$var': invalid variable name" unless $var =~ /^\w+$/;
-        my $symbol = do { no strict 'refs'; \*{"${package}::$var"} };        
-                        
+        my $symbol = do { no strict 'refs'; \*{"${package}::$var"} };
+
         my $value = morph("$root$ns");
         die "'$root$ns': configuration variable is not defined" unless $optional or defined $value;
 
@@ -241,7 +242,7 @@ sub morph ($;$) {
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
                 normalize($patch);
-                $patch = adjust($patch, $delta); 
+                $patch = adjust($patch, $delta);
             } else {
                 substr($ns, 0, length $main_ns) eq $main_ns or die;
                 my $delta = substr($ns, length $main_ns);
@@ -250,7 +251,7 @@ sub morph ($;$) {
                 normalize($patch);
             }
 
-            merge($value, $patch); 
+            merge($value, $patch);
             last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB';
         }
     }
