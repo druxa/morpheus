@@ -129,8 +129,6 @@ sub merge ($$) {
 sub export ($$;$) {
     my ($package, $bindings, $root) = @_;
 
-    $root .= "/" if $root and $root !~ m{/$};
-
     # bindings format:
     # ["$X", ...]
     # ["@X", ...]
@@ -140,8 +138,28 @@ sub export ($$;$) {
     # ["x" => "@X", ...]
     # ["x" => [<nested bindings>], ...]
 
-    die "unexpected type $bindings" unless ref $bindings eq "ARRAY";
+    die "unexpected type $bindings" unless ref $bindings eq "ARRAY" or ref $bindings eq "SCALAR";
     $root ||= "";
+
+    if (ref $bindings eq "SCALAR") {
+
+        my $value = morph("$root");
+        die "'$root': configuration variable is not defined" unless defined $value;
+
+       if (ref $value eq "GLOB") {
+            if (defined ${*{$value}}) {
+                $$bindings = ${*{$value}};
+            } else {
+                die "'$root': configuration variable of type \$ is not defined";
+            }
+        } else {
+            $$bindings = $value;
+        }
+
+        return;
+    }
+
+    $root .= "/" if $root and $root !~ m{/$};
 
     while (@$bindings) {
         my $ns = shift @$bindings;
@@ -190,7 +208,8 @@ sub export ($$;$) {
             } elsif ($optional) {
                 *$symbol = \@{*$symbol};
             } else {
-                die "'$root$ns' => '$type$var': $value is not an array or glob";
+
+                die "'$root$ns' => '$type$var': $value is not an array or glob: " . ref $value;
             }
         } elsif ($type eq '%') {
             if (ref $value eq "HASH") {

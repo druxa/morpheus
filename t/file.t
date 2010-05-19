@@ -41,5 +41,3 @@ is_deeply(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw(@y)
 is(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw($y)]; $y#)), "a", "@/\$ collision => \$");
 throws_ok(sub{ eval(q#package X; use Morpheus "test/file/collision" => [qw(%y)];#); die if $@}, qr/not defined/, "@/\$ collision => %");
 
-
-
