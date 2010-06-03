@@ -59,7 +59,9 @@ use Morpheus::Plugin::File::Path;
 
 
 sub plugins {
-    return (
+    our @plugins;
+    return @plugins if @plugins;
+    @plugins = ( #FIXME: some plugins lookup or meta-plugins usage
         "Morpheus::Overrides",
         "Morpheus::Plugin::Env",
         "Morpheus::Plugin::File::Path",
@@ -67,6 +69,10 @@ sub plugins {
         "Morpheus::Plugin::Core",
         "Morpheus::Defaults",
     );
+    for (@plugins) {
+        $_ = $_->new() if ($_->can("new"));
+    }
+    return @plugins;
 };
 
 sub normalize ($) {

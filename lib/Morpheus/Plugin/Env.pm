@@ -1,30 +1,18 @@
 package Morpheus::Plugin::Env;
 use strict;
 
+use base qw(Morpheus::Plugin);
+
 sub list ($$) {
     my ($class, $ns) = @_;
     return ("");
 }
 
-sub morph ($$) {
-    my ($class, $ns) = @_;
-    return (undef) unless $ns eq "";
-
-    our $data;
-    unless (defined $data) {
-        $data = {};
-        if (defined $ENV{MORPHEUS}) {
-            my @data = eval "package Morpheus::Plugin::Env::Sandbox; $ENV{MORPHEUS}";
-            die $@ if $@;
-            if (@data == 1) {
-               ($data) = @data;
-            } else {
-                $data = {@data};
-            }
-        }
-    }
-
-    return $data;
+sub content ($$) {
+    my ($self, $ns) = @_;
+    die if $ns;
+    return ("MORPHEUS" => $ENV{MORPHEUS}) if $ENV{MORPHEUS};
+    return;
 }
 
 1;

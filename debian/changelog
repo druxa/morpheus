@@ -1,3 +1,10 @@
+libmorpheus-perl (0.2.4) stable; urgency=low
+
+  * base class Morpheus::Plugin introduced
+  * File and Env plugins refactored
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Thu, 03 Jun 2010 22:03:27 +0400
+
 libmorpheus-perl (0.2.3) stable; urgency=low
 
   * binding to 'my'
