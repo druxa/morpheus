@@ -51,11 +51,9 @@ use Morpheus::Overrides;
 use Morpheus::Defaults;
 use Morpheus::Plugin::Core;
 use Morpheus::Plugin::Env;
-
+use Morpheus::Plugin::DB;
 use Morpheus::Plugin::File;
 use Morpheus::Plugin::File::Path;
-
-#use Morpheus::Plugins::DB;
 
 
 sub plugins {
@@ -64,6 +62,7 @@ sub plugins {
     @plugins = ( #FIXME: some plugins lookup or meta-plugins usage
         "Morpheus::Overrides",
         "Morpheus::Plugin::Env",
+        "Morpheus::Plugin::DB",
         "Morpheus::Plugin::File::Path",
         "Morpheus::Plugin::File",
         "Morpheus::Plugin::Core",
@@ -263,13 +262,13 @@ sub morph ($;$) {
             };
 
             if (length $main_ns > length $ns) {
-                substr($main_ns, 0, length $ns) eq $ns or die;
+                substr($main_ns, 0, length $ns) eq $ns or die "$plugin: list('$main_ns'): '$ns'";
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
                 normalize($patch);
                 $patch = adjust($patch, $delta);
             } else {
-                substr($ns, 0, length $main_ns) eq $main_ns or die;
+                substr($ns, 0, length $main_ns) eq $main_ns or die "$plugin: list('$main_ns'): '$ns'";
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;

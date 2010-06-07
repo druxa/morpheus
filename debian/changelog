@@ -1,8 +1,9 @@
 libmorpheus-perl (0.2.5) stable; urgency=low
 
   * allow using -defaults & -overrides from plugins
+  * DB plugin 
 
- -- Andrei Mishchenko <druxa@yandex-team.ru>  Mon, 07 Jun 2010 19:37:26 +0400
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Mon, 07 Jun 2010 19:40:48 +0400
 
 libmorpheus-perl (0.2.4) stable; urgency=low
 
