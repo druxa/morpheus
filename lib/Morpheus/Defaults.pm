@@ -2,9 +2,9 @@ package Morpheus::Defaults;
 use strict;
 use base qw(Morpheus::Overrides);
 
+our $cache = {};
 sub cache {
-    our $cache;
-    return \$cache;
+    return $cache;
 }
 
 1;
