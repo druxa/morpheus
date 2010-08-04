@@ -1,12 +1,11 @@
 package Morpheus;
 use strict;
 sub normalize ($);
-sub merge ($$);
+sub merge ($$;$);
 sub morph ($;$);
 sub export ($$;$);
 
 use Data::Dumper;
-
 
 #
 # use Morpheus -defaults => {
@@ -19,7 +18,7 @@ use Data::Dumper;
 #   "v5" => "$V5", "v6/a" => "$A", "v6/b" => "$B",
 #   "v7" => [ "$C", "$D", "e" => "@E" ],
 # ], -export => [
-#   qw(morph normalize merge)
+#   qw(morph merge normalize export)
 # ];
 #
 
@@ -44,51 +43,26 @@ sub import ($;@) {
     }
     $export ||= [qw(morph)];
     no strict 'refs';
-    *{"${caller}::$_"} = \&{$_} for @$export; # normalize merge morph
+    *{"${caller}::$_"} = \&{$_} for @$export;
 }
 
-use Morpheus::Overrides;
 use Morpheus::Defaults;
-use Morpheus::Plugin::Core;
-use Morpheus::Plugin::Env;
-use Morpheus::Plugin::DB;
-use Morpheus::Plugin::File;
-use Morpheus::Plugin::File::Path;
-
-
-sub plugins {
-    our @plugins;
-    return @plugins if @plugins;
-    @plugins = ( #FIXME: some plugins lookup or meta-plugins usage
-        "Morpheus::Overrides",
-        "Morpheus::Plugin::Env",
-        "Morpheus::Plugin::DB",
-        "Morpheus::Plugin::File::Path",
-        "Morpheus::Plugin::File",
-        "Morpheus::Plugin::Core",
-        "Morpheus::Defaults",
-    );
-    for (@plugins) {
-        $_ = $_->new() if ($_->can("new"));
-    }
-    return @plugins;
-};
+use Morpheus::Overrides;
+use Morpheus::Bootstrap;
 
 sub normalize ($) {
     my ($data) = @_;
     return unless ref $data eq "HASH";
     for my $key ( keys %$data) {
-        my @keys = split m{/+}, $key;
-        normalize($data->{$key});
+        my @keys = grep {$_} split m{/}, $key;
         next if @keys == 1;
 
         my $value = delete $data->{$key};
         my $p = my $patch = {};
         $p = $p->{$_} = {} for splice @keys, 0, -1;
-        merge($p->{$keys[0]}, $value);
-        # {"a/b/c"=>"d"} -> {a=>{b=>{c=>"d"}}}
-
+        $p->{$keys[0]} = $value;
         merge($data, $patch);
+        # {"a/b/c"=>"d"} -> {a=>{b=>{c=>"d"}}}
     }
 }
 
@@ -107,16 +81,19 @@ sub adjust ($$) {
     return $value;
 }
 
-sub merge ($$) {
-    my ($value, $patch) = @_;
-
-    normalize($patch);
+sub merge ($$;$) {
+    my ($value, $patch, $mode) = @_;
+    $mode = 1 unless defined $mode; # value priority > patch priority
 
     unless (defined $value) {
         $_[0] = $patch;
         return;
+    } 
+    unless (defined $patch) {
+        return;
     }
 
+    #TODO: support mode "-1" (value priority < patch priority)
     if (ref $value eq "GLOB" and *{$value}{HASH}) {
         $value = \%{*{$value}};
     }
@@ -124,10 +101,13 @@ sub merge ($$) {
         $patch = \%{*{$patch}};
     }
 
-    return unless defined $patch and ref $value eq "HASH" and ref $patch eq "HASH";
+    unless (defined $patch and ref $value eq "HASH" and ref $patch eq "HASH") {
+        die "merge: collision" if $mode == 0; #FIXME: dump keys stack
+        return;
+    }
 
     for my $key (keys %$patch) {
-        merge($value->{$key}, $patch->{$key});
+        merge($value->{$key}, $patch->{$key}, $mode);
     }
 }
 
@@ -237,15 +217,42 @@ sub export ($$;$) {
 }
 
 our $stack = {};
+our $bootstrapped;
+our @plugins;
 
 sub morph ($;$) {
     my ($main_ns, $type) = @_;
+
+    unless (defined $bootstrapped) { 
+        #FIXME: we just need a proper caching and its invalidation
+        # then we could always call morph("/morpheus/plugins") and omit tracking if we are boostrapped or not
+
+        my $plugins = { 
+            Bootstrap => {
+                priority => 1,
+                object => 'Morpheus::Bootstrap',
+            },
+        };
+
+        while () {
+            local $bootstrapped = 0;
+            @plugins = map { $_->{object} } sort { $b->{priority} <=> $a->{priority} } grep { $_->{priority} } values %$plugins;
+            my $plugins_set = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
+            warn "plugins_before: $plugins_set";
+            $plugins = morph("/morpheus/plugins", "%");
+            my $plugins_set2 = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
+            warn "plugins_after: $plugins_set2";
+            last if $plugins_set eq $plugins_set2;
+            #FIXME: check if we hang
+        }
+        $bootstrapped = 1;
+    }
 
     $main_ns ||= "";
     my $value;
 
     OUTER:
-    for my $plugin (plugins()) {
+    for my $plugin (@plugins) {
 
         my @list = do {
             next if $stack->{"$plugin\0$main_ns"};
@@ -265,14 +272,12 @@ sub morph ($;$) {
                 substr($main_ns, 0, length $ns) eq $ns or die "$plugin: list('$main_ns'): '$ns'";
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
-                normalize($patch);
                 $patch = adjust($patch, $delta);
             } else {
                 substr($ns, 0, length $main_ns) eq $main_ns or die "$plugin: list('$main_ns'): '$ns'";
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;
-                normalize($patch);
             }
 
             merge($value, $patch);
@@ -281,17 +286,20 @@ sub morph ($;$) {
     }
     if ($type and ref $value eq "GLOB") {
         if ($type eq '$') {
-            return ${*{$value}};
+            $value = ${*{$value}};
         } elsif ($type eq '@') {
-            return \@{*{$value}};
+            $value = \@{*{$value}};
         } elsif ($type eq '%') {
-            return \%{*{$value}};
+            $value = \%{*{$value}};
         } else {
             die "invalid type value '$type'"
         }
-    } else {
-        return $value;
     }
+
+    #use Yandex::Logger;
+    #DEBUG "$main_ns affects: ", join ", ", keys %$stack;
+
+    return $value;
 }
 
 1;

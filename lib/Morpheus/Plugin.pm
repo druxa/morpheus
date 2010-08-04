@@ -2,6 +2,7 @@ package Morpheus::Plugin;
 # base class for most plugins
 use strict;
 
+use Morpheus -export => [qw(normalize)];
 use Digest::MD5 qw(md5_hex);
 
 sub _package ($$) {
@@ -53,6 +54,7 @@ $content
         } else {
             $self->{cache}->{$ns} = {@eval};
         }
+        normalize($self->{cache}->{$ns});
     }
     die "'$file': config block should return or define something" unless defined $self->{cache}->{$ns};
 }
@@ -69,10 +71,14 @@ sub _get ($$) {
     for (keys %$stash) {
         next unless $_;
         my $glob = $stash->{$_};
-        if (defined *{$glob}{ARRAY} or defined *{$glob}{HASH}) {
+        if (defined *{$glob}{HASH}) {
+            normalize(*{$glob}{HASH});
+            $value->{$_} = \*{$glob};
+        } elsif (defined *{$glob}{ARRAY}) {
             $value->{$_} = \*{$glob};
         } elsif (defined ${$glob}) {
             $value->{$_} = ${$glob};
+            normalize($value->{$_});
         }
     }
     return $value;

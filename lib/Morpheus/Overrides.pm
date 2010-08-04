@@ -1,6 +1,6 @@
 package Morpheus::Overrides;
 use strict;
-use Morpheus -export => [qw(merge)];
+use Morpheus -export => [qw(merge normalize)];
 
 our $cache = {};
 sub cache {
@@ -10,7 +10,7 @@ sub cache {
 sub import ($$) {
     my ($class, $patch) = @_;
     return unless $patch;
-    die "unexpeced $patch" unless ref $patch eq "HASH";
+    die "unexpected $patch" unless ref $patch eq "HASH";
     my $cache = $class->cache();
     push @{$cache->{list}}, $patch;
 }
@@ -26,6 +26,7 @@ sub morph ($$) {
     my $cache = $class->cache();
     while($cache->{list} and @{$cache->{list}}) {
         my $patch = shift @{$cache->{list}};
+        normalize($patch);
         merge($cache->{data}, $patch);
     }
     return $cache->{data};
