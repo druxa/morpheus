@@ -45,7 +45,6 @@ sub morph ($) {
         }
     } unless $data;
 
-    warn "Extra::morph";
     return $data;
 }
 

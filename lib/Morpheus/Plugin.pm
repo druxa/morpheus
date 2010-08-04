@@ -54,7 +54,7 @@ $content
         } else {
             $self->{cache}->{$ns} = {@eval};
         }
-        normalize($self->{cache}->{$ns});
+        $self->{cache}->{$ns} = normalize($self->{cache}->{$ns});
     }
     die "'$file': config block should return or define something" unless defined $self->{cache}->{$ns};
 }
@@ -70,15 +70,15 @@ sub _get ($$) {
     my $value;
     for (keys %$stash) {
         next unless $_;
-        my $glob = $stash->{$_};
+        my $glob = \$stash->{$_};
         if (defined *{$glob}{HASH}) {
-            normalize(*{$glob}{HASH});
-            $value->{$_} = \*{$glob};
+            *{$glob} = normalize(*{$glob}{HASH});
+            $value->{$_} = $glob;
         } elsif (defined *{$glob}{ARRAY}) {
-            $value->{$_} = \*{$glob};
-        } elsif (defined ${$glob}) {
-            $value->{$_} = ${$glob};
-            normalize($value->{$_});
+            $value->{$_} = $glob;
+        } elsif (defined ${*{$glob}}) {
+            $value->{$_} = ${*{$glob}};
+            $value->{$_} = normalize($value->{$_});
         }
     }
     return $value;

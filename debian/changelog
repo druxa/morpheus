@@ -2,9 +2,10 @@ libmorpheus-perl (0.2.6) stable; urgency=low
 
   * bootstrapping plugins
   * normalize is no longer recursive
-  * merge accepts mode
+  * merge return a value instead of modifying inplace
+  * disabling plugins opportunity
 
- -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 30 Jul 2010 22:09:03 +0400
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Wed, 04 Aug 2010 21:23:41 +0400
 
 libmorpheus-perl (0.2.5) stable; urgency=low
 

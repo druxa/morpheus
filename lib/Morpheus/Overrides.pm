@@ -26,8 +26,8 @@ sub morph ($$) {
     my $cache = $class->cache();
     while($cache->{list} and @{$cache->{list}}) {
         my $patch = shift @{$cache->{list}};
-        normalize($patch);
-        merge($cache->{data}, $patch);
+        $patch = normalize($patch);
+        $cache->{data} = merge($cache->{data}, $patch);
     }
     return $cache->{data};
 }

@@ -1,11 +1,12 @@
 package Morpheus;
 use strict;
 sub normalize ($);
-sub merge ($$;$);
+sub merge ($$);
 sub morph ($;$);
 sub export ($$;$);
 
 use Data::Dumper;
+use Symbol;
 
 #
 # use Morpheus -defaults => {
@@ -52,18 +53,20 @@ use Morpheus::Bootstrap;
 
 sub normalize ($) {
     my ($data) = @_;
-    return unless ref $data eq "HASH";
+    return $data unless ref $data eq "HASH";
+    my $result = { %$data };
     for my $key ( keys %$data) {
         my @keys = grep {$_} split m{/}, $key;
         next if @keys == 1;
 
-        my $value = delete $data->{$key};
+        my $value = delete $result->{$key};
         my $p = my $patch = {};
         $p = $p->{$_} = {} for splice @keys, 0, -1;
         $p->{$keys[0]} = $value;
-        merge($data, $patch);
+        $result = merge($result, $patch);
         # {"a/b/c"=>"d"} -> {a=>{b=>{c=>"d"}}}
     }
+    return $result;
 }
 
 sub adjust ($$) {
@@ -81,34 +84,75 @@ sub adjust ($$) {
     return $value;
 }
 
-sub merge ($$;$) {
-    my ($value, $patch, $mode) = @_;
-    $mode = 1 unless defined $mode; # value priority > patch priority
+sub merge ($$) {
+    my ($value, $patch) = @_;
 
-    unless (defined $value) {
-        $_[0] = $patch;
-        return;
+    return $patch unless defined $value;
+    return $value unless defined $patch;
+
+    my %refs = map { $_ => 1 } qw(GLOB HASH ARRAY);
+   
+    # TODO: return a glob itself instead of a globref!
+   
+    my $ref_value = ref $patch;
+    $ref_value = "" unless $refs{$ref_value};
+    my $ref_patch = ref $patch;
+    $ref_patch = "" unless $refs{$ref_patch};
+    
+    if ($ref_value eq "GLOB") {
+        my $result = gensym;
+        *{$result} = *{$value};
+        if ($ref_patch eq "GLOB") {
+            *{$result} = merge(*{$value}{HASH}, *{$patch}{HASH});
+            *{$result} = merge(*{$value}{ARRAY}, *{$patch}{ARRAY});
+            ${*{$result}} = merge(${*{$value}}, ${*{$patch}});
+        } elsif ($ref_patch eq "HASH") {
+            *{$result} = merge(*{$value}{HASH}, $patch);
+        } elsif ($ref_patch eq "ARRAY") {
+            *{$result} = merge(*{$value}{ARRAY}, $patch);
+        } else {
+            ${*{$result}} = merge(${*{$value}}, $patch);
+        }
+        return $result;
     } 
-    unless (defined $patch) {
-        return;
+    
+    if ($ref_patch eq "GLOB") {
+        my $result = gensym;
+        *{$result} = *{$patch};
+        if ($ref_value eq "HASH") {
+            *{$result} = merge($value, *{$patch}{HASH});
+        } elsif ($ref_value eq "ARRAY") {
+            *{$result} = $value;
+        } else {
+            ${*{$result}} = $value;
+        }
+        return $result;
     }
 
-    #TODO: support mode "-1" (value priority < patch priority)
-    if (ref $value eq "GLOB" and *{$value}{HASH}) {
-        $value = \%{*{$value}};
-    }
-    if (ref $patch eq "GLOB" and *{$patch}{HASH}) {
-        $patch = \%{*{$patch}};
+    if ($ref_value ne $ref_patch) {
+        my $result = gensym;
+        if ($ref_value) {
+            *{$result} = $value;
+        } else {
+            ${*{$result}} = $value;
+        }
+        if ($ref_patch) {
+            *{$result} = $patch;
+        } else {
+            ${*{$result}} = $patch;
+        }
+        return $result;
     }
 
-    unless (defined $patch and ref $value eq "HASH" and ref $patch eq "HASH") {
-        die "merge: collision" if $mode == 0; #FIXME: dump keys stack
-        return;
+    if ($ref_value eq "HASH" and $ref_patch eq "HASH") {
+        my $result = { %$value };
+        for (keys %$patch) {
+            $result->{$_} = merge($value->{$_}, $patch->{$_});
+        }
+        return $result;
     }
 
-    for my $key (keys %$patch) {
-        merge($value->{$key}, $patch->{$key}, $mode);
-    }
+    return $value;
 }
 
 sub export ($$;$) {
@@ -238,10 +282,10 @@ sub morph ($;$) {
             local $bootstrapped = 0;
             @plugins = map { $_->{object} } sort { $b->{priority} <=> $a->{priority} } grep { $_->{priority} } values %$plugins;
             my $plugins_set = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            warn "plugins_before: $plugins_set";
+            #warn "plugins_before: $plugins_set";
             $plugins = morph("/morpheus/plugins", "%");
             my $plugins_set2 = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            warn "plugins_after: $plugins_set2";
+            #warn "plugins_after: $plugins_set2";
             last if $plugins_set eq $plugins_set2;
             #FIXME: check if we hang
         }
@@ -280,7 +324,7 @@ sub morph ($;$) {
                 $patch = { $delta => $patch } if $delta;
             }
 
-            merge($value, $patch);
+            $value = merge($value, $patch);
             last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB';
         }
     }
@@ -288,9 +332,9 @@ sub morph ($;$) {
         if ($type eq '$') {
             $value = ${*{$value}};
         } elsif ($type eq '@') {
-            $value = \@{*{$value}};
+            $value = *{$value}{ARRAY};
         } elsif ($type eq '%') {
-            $value = \%{*{$value}};
+            $value = *{$value}{HASH};
         } else {
             die "invalid type value '$type'"
         }
