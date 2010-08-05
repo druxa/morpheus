@@ -3,10 +3,10 @@ use strict;
 use warnings;
 
 sub list ($) {
-    return ("");
+    return ("" => "");
 }
 
-sub morph ($) {
+sub get ($) {
 
     our $data = {
         "morpheus" => {

@@ -5,13 +5,13 @@ use base qw(Morpheus::Plugin);
 
 sub list ($$) {
     my ($class, $ns) = @_;
-    return ("");
+    return ('' => 'MORPHEUS'); #TODO: configure like (ENV_VAR1 => '/key1/', ENV_VAR2 => '/key2/subkey/', ...)
 }
 
 sub content ($$) {
-    my ($self, $ns) = @_;
-    die if $ns;
-    return ("MORPHEUS" => $ENV{MORPHEUS}) if $ENV{MORPHEUS};
+    my ($self, $token) = @_;
+    die if $token ne 'MORPHEUS';
+    return $ENV{MORPHEUS} if $ENV{MORPHEUS};
     return;
 }
 

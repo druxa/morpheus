@@ -11,18 +11,16 @@ sub config_path {
 
 sub list ($$) {
     my ($class, $ns) = @_;
-    return ("morpheus/plugin/file/options/path") if "morpheus/plugin/file/options/path/" =~ m{^\Q$ns/\E};
+    return ("morpheus/plugin/file/options/path" => '') if "morpheus/plugin/file/options/path/" =~ m{^\Q$ns/\E};
     return ();
 }
 
-sub morph ($$) {
-    my ($class, $ns) = @_;
-    if ($ns eq "morpheus/plugin/file/options/path") {
-        our @config_path;
-        @config_path = config_path() unless @config_path;
-        return [@config_path];
-    }
-    return (undef);
+sub get ($$) {
+    my ($class, $token) = @_;
+    die 'mystery' if $token;
+    our @config_path;
+    @config_path = config_path() unless @config_path;
+    return [@config_path];
 }
 
 1;

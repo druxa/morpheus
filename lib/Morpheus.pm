@@ -282,11 +282,9 @@ sub morph ($;$) {
             local $bootstrapped = 0;
             @plugins = map { $_->{object} } sort { $b->{priority} <=> $a->{priority} } grep { $_->{priority} } values %$plugins;
             my $plugins_set = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            #warn "plugins_before: $plugins_set";
             $plugins = morph("/morpheus/plugins", "%");
-            my $plugins_set2 = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            #warn "plugins_after: $plugins_set2";
-            last if $plugins_set eq $plugins_set2;
+            my $plugins_set_new = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
+            last if $plugins_set eq $plugins_set_new;
             #FIXME: check if we hang
         }
         $bootstrapped = 1;
@@ -303,29 +301,29 @@ sub morph ($;$) {
             local $stack->{"$plugin\0$main_ns"} = 1;
             $plugin->list($main_ns);
         };
-        @list = sort {length $b <=> length $a} @list;
-        for my $ns (@list) {
+        while (@list) {
+            my ($ns, $token) = splice @list, 0, 2;
 
             my $patch = do {
-                next if $stack->{"$plugin\0$main_ns\0$ns"};
-                local $stack->{"$plugin\0$main_ns\0$ns"} = 1;
-                $plugin->morph($ns);
+                next if $stack->{"$plugin\0$main_ns\0$token"};
+                local $stack->{"$plugin\0$main_ns\0$token"} = 1;
+                $plugin->get($token);
             };
 
             if (length $main_ns > length $ns) {
-                substr($main_ns, 0, length $ns) eq $ns or die "$plugin: list('$main_ns'): '$ns'";
+                substr($main_ns, 0, length $ns) eq $ns or die "$plugin: list('$main_ns'): '$ns' => '$token'";
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
                 $patch = adjust($patch, $delta);
             } else {
-                substr($ns, 0, length $main_ns) eq $main_ns or die "$plugin: list('$main_ns'): '$ns'";
+                substr($ns, 0, length $main_ns) eq $main_ns or die "$plugin: list('$main_ns'): '$ns' => '$token'";
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;
             }
 
             $value = merge($value, $patch);
-            last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB';
+            last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB'; #FIXME: actually merge now merges ARRAY and SCALAR into a GLOB
         }
     }
     if ($type and ref $value eq "GLOB") {

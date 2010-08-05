@@ -6,10 +6,10 @@ use Morpheus::Overrides;
 use Morpheus::Defaults;
 
 sub list ($) {
-    return ("");
+    return ("" => "");
 }
 
-sub morph ($) {
+sub get ($) {
 
     our $data = {
         "morpheus" => {

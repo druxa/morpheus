@@ -9,12 +9,12 @@ use Morpheus -defaults => {
         key => "Name",
         value => "Config",
     },
-}, -export => [];
+}, -export => []; 
 
 use DBI;
 
 sub content ($$) {
-    my ($self, $ns) = @_;
+    my ($self, $token) = @_;
 
     my $options = $self->{options};
     my $dbh = $options->{connect}->();
@@ -22,8 +22,8 @@ sub content ($$) {
     my ($content) = $dbh->selectrow_array(qq#
         select `$options->{value}` from `$options->{table}`
         where `$options->{key}` = ?
-    #, undef, $ns);
-    return ("$options->{table}.$options->{value}\[$options->{key} = $ns\]" => $content);
+    #, undef, $token);
+    return $content;
 }
 
 my %escape = ("_" => "\\_", "%" => "\\%", "\\" => "\\\\");
@@ -37,6 +37,7 @@ sub list ($$) {
 
     unless ($self->{options}->{connect}) {
         $self->{options} = Morpheus::morph("morpheus/plugin/db/options");
+        #FIXME: move these opions to the new() arguments, to allow several DB plugins coexist and be configured differently
     }
     my $options = $self->{options};
     return () unless $options->{connect};
@@ -58,7 +59,7 @@ sub list ($$) {
         where `$options->{key}` like ? or `$options->{key}` in (#. join (",", ("?") x @prefix) .qq#)
     #, undef, "$pattern/%", @prefix)};
     
-    return @list;
+    return map { ($_ => $_) } sort { length $b <=> length $a } @list;
 }
 
 1;

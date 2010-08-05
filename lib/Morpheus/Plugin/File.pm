@@ -6,12 +6,11 @@ use base qw(Morpheus::Plugin);
 use File::Find;
 
 sub content ($$) {
-    my ($self, $ns) = @_;
-    my $file = $self->_find_file($ns);
-    open my $fh, "<", "$file" or die "open $file failed: $!";
+    my ($self, $file) = @_;
+    open my $fh, "<", "$file" or die "open '$file' failed: $!";
     my $content = do { local $/; <$fh> };
-    close $fh or die "close failed: $!";
-    return ($file => $content);
+    close $fh or die "close '$file' failed: $!";
+    return $content;
 }
 
 sub _find_file ($$) {
@@ -34,36 +33,54 @@ sub list ($$) {
 
     unless ($self->{config_path}) {
         $self->{config_path} = Morpheus::morph("morpheus/plugin/file/options/path");
-        #FIXME: move caching to Morpheus.pm itself
+        #FIXME: move these options to new() parameters to allow several File plugins coexist and be configured differently
     }
 
-    my %list;
+    my @list;
     for my $config_path (@{$self->{config_path}}) {
         $config_path =~ s{/+$}{};
+        my %list;
+
+        my $process_file = sub {
+            my ($full_file) = @_;
+            -f $full_file or return;
+            die 'mystery' unless $full_file =~ m{^\Q$config_path\E/(.*)};
+            my $file = $1;
+            return unless $file =~ s{(\.(-?\d+))?\.(?:cfg|conf)$}{}; #TODO: make the list of suffixes configurable
+            push @{$list{$file}}, {
+                file => $full_file,
+                priority => $1 || 0,
+            };
+        };
+
         if (-d "$config_path/$main_ns") {
             find({
                 no_chdir => 1,
                 follow_skip => 2,
-                wanted => sub {
-                    -f or return;
-                    die unless $File::Find::name =~ m{^\Q$config_path\E/(.*)};
-                    my $ns = $1;
-                    return unless $ns =~ s{\.(?:cfg|conf)$}{};
-                    die "mystery: $ns" unless $self->_find_file($ns);
-                    $list{$ns} = 1;
-                }
+                wanted => sub { $process_file->($File::Find::name) },
             }, "$config_path/$main_ns");
         }
-    }
-    my @list = keys %list;
 
-    my $ns = $main_ns;
-    while ($ns) {
-        push @list, $ns if $self->_find_file($ns);
-        $ns =~ s{/?[^/]+$}{};
+        my $ns = $main_ns;
+        while ($ns) {
+            for my $file (glob ("$config_path/$ns*")) {
+                $process_file->($file);
+            }
+            $ns =~ s{/?[^/]+$}{};
+        }
+
+        for my $ns (sort { length $b <=> length $a } keys %list) {
+            for (sort { $b->{priority} <=> $a->{priority} } @{$list{$ns}}) {
+                push @list, $ns => $_->{file};
+            }
+        }
     }
 
-    return @list;
+    return @list; 
+    # priority rules: config path, then file depth, then file suffix.
+    # for example if config path is /etc/:/etc2/ and there exist files 
+    # /etc{,2}/x{/y,}{.-10,,.10}.cfg
+    # then the order of their priority from higher to lower is from left to right
 }
 
 1;

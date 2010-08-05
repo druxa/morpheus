@@ -4,12 +4,12 @@ use strict;
 use Sys::Hostname;
 
 sub list {
-    return ("");
+    return ('' => '');
 }
 
-sub morph ($$) {
-    my ($class, $ns) = @_;
-    return if $ns;
+sub get ($$) {
+    my ($class, $token) = @_;
+    die 'mystery' if $token;
 
     our $data = {
         'system' => {

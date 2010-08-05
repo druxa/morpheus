@@ -16,10 +16,10 @@ sub import ($$) {
 }
 
 sub list ($$) {
-    return ("");
+    return ('' => '');
 }
 
-sub morph ($$) {
+sub get ($$) {
     my ($class, $ns) = @_;
     die "mystery" if $ns;
 
