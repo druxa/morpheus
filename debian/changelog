@@ -1,3 +1,13 @@
+libmorpheus-perl (0.2.8) stable; urgency=low
+
+  * File plugin: file priorities have been changed
+  * Simple plugin base class introduced
+  * Plugin.pm renamed to Plugin/Content.pm
+  * Content plugin: base class allows several instances of the same descendant
+    class; sandbox cleanup on destruction
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 06 Aug 2010 16:23:28 +0400
+
 libmorpheus-perl (0.2.7) stable; urgency=low
 
   * plugins api refactored 

@@ -274,7 +274,7 @@ sub morph ($;$) {
         my $plugins = { 
             Bootstrap => {
                 priority => 1,
-                object => 'Morpheus::Bootstrap',
+                object => Morpheus::Bootstrap->new(),
             },
         };
 

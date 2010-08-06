@@ -1,7 +1,7 @@
 package Morpheus::Plugin::File;
 use strict;
 
-use base qw(Morpheus::Plugin);
+use base qw(Morpheus::Plugin::Content);
 
 use File::Find;
 
@@ -46,7 +46,7 @@ sub list ($$) {
             -f $full_file or return;
             die 'mystery' unless $full_file =~ m{^\Q$config_path\E/(.*)};
             my $file = $1;
-            return unless $file =~ s{(\.(-?\d+))?\.(?:cfg|conf)$}{}; #TODO: make the list of suffixes configurable
+            return unless $file =~ s{(?:\.(-?\d+))?\.(?:cfg|conf)$}{}; #TODO: make the list of suffixes configurable
             push @{$list{$file}}, {
                 file => $full_file,
                 priority => $1 || 0,
@@ -79,7 +79,10 @@ sub list ($$) {
     return @list; 
     # priority rules: config path, then file depth, then file suffix.
     # for example if config path is /etc/:/etc2/ and there exist files 
-    # /etc{,2}/x{/y,}{.-10,,.10}.cfg
+    # /etc/x/y.10.cfg /etc/x/y.cfg /etc/x/y.-10.cfg 
+    # /etc/x.10.cfg /etc/x.cfg /etc/x.-10.cfg 
+    # /etc2/x/y.10.cfg /etc2/x/y.cfg /etc2/x/y.-10.cfg 
+    # /etc2/x.10.cfg /etc2/x.cfg /etc2/x.-10.cfg
     # then the order of their priority from higher to lower is from left to right
 }
 

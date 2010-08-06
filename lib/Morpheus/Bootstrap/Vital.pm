@@ -5,13 +5,10 @@ use warnings;
 use Morpheus::Overrides;
 use Morpheus::Defaults;
 
-sub list ($) {
-    return ("" => "");
-}
+use Morpheus::Plugin::Simple;
 
-sub get ($) {
-
-    our $data = {
+sub new {
+    return Morpheus::Plugin::Simple->new({
         "morpheus" => {
             "plugins" => {
 
@@ -25,8 +22,7 @@ sub get ($) {
                 },
             }
         }
-    } unless $data;
-    return $data;
+    });
 }
 
 1;

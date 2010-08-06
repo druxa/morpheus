@@ -1,7 +1,7 @@
 package Morpheus::Plugin::Env;
 use strict;
 
-use base qw(Morpheus::Plugin);
+use base qw(Morpheus::Plugin::Content);
 
 sub list ($$) {
     my ($class, $ns) = @_;

@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 20;
+use Test::More tests => 21;
 use Test::Exception;
 
 use lib 'lib';
@@ -40,4 +40,6 @@ throws_ok(sub{ eval(q#package X; use Morpheus "test/file/collision" => [qw($x)];
 is_deeply(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw(@y)]; [@y]#)), [1,2,3], "@/\$ collision => @");
 is(scalar(eval(q#package X; use Morpheus "test/file/collision" => [qw($y)]; $y#)), "a", "@/\$ collision => \$");
 throws_ok(sub{ eval(q#package X; use Morpheus "test/file/collision" => [qw(%y)];#); die if $@}, qr/not defined/, "@/\$ collision => %");
+
+is_deeply(morph("test/file/priority/check"), { map { ("x$_" => 1) } (1..12) }, "priority of files");
 

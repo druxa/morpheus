@@ -2,46 +2,47 @@ package Morpheus::Bootstrap;
 use strict;
 use warnings;
 
-sub list ($) {
-    return ('' => '');
-}
+use Morpheus::Plugin::Simple;
 
-sub get ($) {
+sub new {
 
-    our $data;
-    return $data if $data;
-
-    my $loaded = {};
-    for my $path (@INC) {
-        for my $file (glob "$path/Morpheus/Bootstrap/*.pm") {
-            $file =~ m{/([^/]+)\.pm$} or die;
-            my $booter = $1;
-            next if $loaded->{$booter};
-            require $file;
-            my $object = "Morpheus::Bootstrap::$booter";
-            $object = $object->new() if $booter->can('new');
-            $loaded->{$booter} = {
-                priority => 300,
-                object => $object,
-            };
-        }
-    }
-
-    $data = {
-        "morpheus" => {
-            "plugins" => {
-
-                Bootstrap => {
-                    priority => 200,
-                    object => 'Morpheus::Bootstrap',
-                },
-
-                %$loaded,
-            }
-        }
+    my $this = {
+        priority => 200,
     };
 
-    return $data;
+    my $that = Morpheus::Plugin::Simple->new(sub {
+
+        my $loaded = {};
+        for my $path (@INC) {
+            for my $file (glob "$path/Morpheus/Bootstrap/*.pm") {
+                $file =~ m{/([^/]+)\.pm$} or die;
+                my $name = $1;
+                next if $loaded->{$name};
+                require $file;
+                my $object = "Morpheus::Bootstrap::$name";
+                $object = $object->new() if $object->can('new');
+                $loaded->{$name} = {
+                    priority => 300,
+                    object => $object,
+                };
+            }
+        }
+
+        return {
+            "morpheus" => {
+                "plugins" => {
+    
+                    Bootstrap => $this,
+
+                    %$loaded,
+                }
+            }
+        };
+    });
+
+    $this->{object} = $that;
+
+    return $that;
 }
 
 1;

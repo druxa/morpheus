@@ -8,19 +8,16 @@ use Morpheus::Plugin::File::Path;
 use Morpheus::Plugin::File;
 use Morpheus::Plugin::Core;
 
-sub list ($) {
-    return ("" => "");
-}
+use Morpheus::Plugin::Simple;
 
-sub get ($) {
-
-    our $data = {
+sub new {
+    return Morpheus::Plugin::Simple->new({
         "morpheus" => {
             "plugins" => {
 
                 Core => {
                     priority => 20,
-                    object => 'Morpheus::Plugin::Core',
+                    object => Morpheus::Plugin::Core->new(),
                 },
 
                 File => {
@@ -43,9 +40,7 @@ sub get ($) {
                 }
             }
         }
-    } unless $data;
-
-    return $data;
+    });
 }
 
 1;

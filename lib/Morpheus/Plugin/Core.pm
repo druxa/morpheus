@@ -3,22 +3,17 @@ use strict;
 
 use Sys::Hostname;
 
-sub list {
-    return ('' => '');
-}
+use Morpheus::Plugin::Simple;
 
-sub get ($$) {
-    my ($class, $token) = @_;
-    die 'mystery' if $token;
-
-    our $data = {
-        'system' => {
-            hostname => hostname(),
-            script => $0,
-        }
-    } unless defined $data;
-
-    return $data;
+sub new {
+    return Morpheus::Plugin::Simple->new(sub {
+        return {
+            'system' => {
+                hostname => hostname(),
+                script => $0,
+            }
+        };
+    });
 }
 
 1;

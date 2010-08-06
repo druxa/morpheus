@@ -1,7 +1,7 @@
 package Morpheus::Plugin::DB;
 use strict;
 
-use base qw(Morpheus::Plugin);
+use base qw(Morpheus::Plugin::Content);
 
 use Morpheus -defaults => {
     "morpheus/plugin/db/options" => {
