@@ -1,3 +1,11 @@
+libmorpheus-perl (0.2.9) stable; urgency=low
+
+  * Plugin/Content: fix warnings
+  * Morpheus: fix merge method 
+  * Plugin/File: fix file lookup 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Mon, 09 Aug 2010 21:12:38 +0400
+
 libmorpheus-perl (0.2.8) stable; urgency=low
 
   * File plugin: file priorities have been changed

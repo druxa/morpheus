@@ -30,23 +30,27 @@ sub _find_file ($$) {
 
 sub list ($$) {
     my ($self, $main_ns) = @_;
+    $main_ns =~ s{^/+}{};
 
     unless ($self->{config_path}) {
-        $self->{config_path} = Morpheus::morph("morpheus/plugin/file/options/path");
+        $self->{config_path} = Morpheus::morph("/morpheus/plugin/file/options/path");
         #FIXME: move these options to new() parameters to allow several File plugins coexist and be configured differently
     }
+
+    return () unless $self->{config_path};
 
     my @list;
     for my $config_path (@{$self->{config_path}}) {
         $config_path =~ s{/+$}{};
         my %list;
 
-        my $process_file = sub {
-            my ($full_file) = @_;
+        my $process_file = sub ($;$) {
+            my ($full_file, $ns) = @_;
             -f $full_file or return;
             die 'mystery' unless $full_file =~ m{^\Q$config_path\E/(.*)};
             my $file = $1;
             return unless $file =~ s{(?:\.(-?\d+))?\.(?:cfg|conf)$}{}; #TODO: make the list of suffixes configurable
+            return if $ns and $file ne $ns;
             push @{$list{$file}}, {
                 file => $full_file,
                 priority => $1 || 0,
@@ -63,8 +67,8 @@ sub list ($$) {
 
         my $ns = $main_ns;
         while ($ns) {
-            for my $file (glob ("$config_path/$ns*")) {
-                $process_file->($file);
+            for my $file (glob ("$config_path/$ns*")) { # $ns.cfg or $ns.10.cfg but not $ns-blah.cfg
+                $process_file->($file, $ns);
             }
             $ns =~ s{/?[^/]+$}{};
         }

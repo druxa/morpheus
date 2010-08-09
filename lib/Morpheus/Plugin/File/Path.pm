@@ -11,7 +11,7 @@ sub config_path {
 
 sub list ($$) {
     my ($class, $ns) = @_;
-    return ("morpheus/plugin/file/options/path" => '') if "morpheus/plugin/file/options/path/" =~ m{^\Q$ns/\E};
+    return ("morpheus/plugin/file/options/path" => '') if "/morpheus/plugin/file/options/path/" =~ m{^/?\Q$ns\E/?};
     return ();
 }
 

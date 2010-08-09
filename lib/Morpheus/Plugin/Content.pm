@@ -8,7 +8,7 @@ use Symbol qw(delete_package);
 
 sub _package ($$) {
     my ($self, $token) = @_;
-    my $md5_self = md5_hex($self);
+    my $md5_self = md5_hex("$self");
     my $md5 = md5_hex($token);
     $token =~ s/[^\w]/_/g;
     return "Morpheus::Sandbox::${md5_self}::${token}_${md5}";
@@ -17,12 +17,12 @@ sub _package ($$) {
 sub DESTROY {
     local $@;
     my ($self) = @_;
-    my $md5_self = md5_hex($self);
+    my $md5_self = md5_hex("$self");
     my $sandbox = "Morpheus::Sandbox::${md5_self}";
     my $stash = do { no strict qw(refs); \%{"${sandbox}::"}; };
     for (keys %$stash) {
         /^(.*)::$/ or next;
-        delete_package($1);
+        delete_package($sandbox."::$1");
     }
     delete_package($sandbox);
 }
@@ -45,10 +45,10 @@ sub _process ($$) {
     # a partial evaluation support
     $self->{cache}->{$token} = undef; 
     # this line makes it possible to properly process config blocks like
-    #######################
+    #############################
     # $X = 5;
-    # $Y = morph("X") + 1;
-    #######################
+    # $Y = morph("X") + 1; # 6 
+    #############################
 
     my @eval = eval qq{
 no strict;

@@ -5,23 +5,43 @@ sub merge ($$);
 sub morph ($;$);
 sub export ($$;$);
 
-use Data::Dumper;
 use Symbol;
 
-#
-# use Morpheus -defaults => {
-#   "foo/bar" => { x => 1, y => 2 },
-#   "bar/baz" => "abc",
-# }, -overrides => {
-#   "baz/foo" => { "x/y" => 3 },
-# }, "x/y/z" => [
-#   qw($V1 $V2 @V3 %V4),
-#   "v5" => "$V5", "v6/a" => "$A", "v6/b" => "$B",
-#   "v7" => [ "$C", "$D", "e" => "@E" ],
-# ], -export => [
-#   qw(morph merge normalize export)
-# ];
-#
+=head1 NAME
+
+Morpheus - the ultimate configuration engine
+
+=head1 SYNOPSIS
+
+  use Morpheus "/foo/bar" => [
+      qw($V1 @V2 %V3 *V4),
+      "v5" => "$V5", "v6/a" => "$A", "v6/b" => "%B",
+      "v7" => [ "$C", "$D", "e" => "@E" ],
+  ]; 
+
+  use Morpheus -defaults => {
+      "/foo/bar" => { x => 1, y => 2},
+  };
+
+  use Morpheus -overrides => {
+      "/foo/bar" => { "x/y" => 3 },
+  };
+
+  use Morpheus -export => [
+      qw(morph merge normalize export)
+  ];
+
+  use Morpheus;
+
+  morph("/foo/bar");
+  morph("/foo/bar/x", "$");
+  morph("/foo/bar/y", "@");
+
+=head1 DESCRIPTION
+
+Morph it!
+
+=cut
 
 sub import ($;@) {
     my $class = shift;
@@ -94,7 +114,7 @@ sub merge ($$) {
    
     # TODO: return a glob itself instead of a globref!
    
-    my $ref_value = ref $patch;
+    my $ref_value = ref $value;
     $ref_value = "" unless $refs{$ref_value};
     my $ref_patch = ref $patch;
     $ref_patch = "" unless $refs{$ref_patch};
@@ -266,6 +286,10 @@ our @plugins;
 
 sub morph ($;$) {
     my ($main_ns, $type) = @_;
+    $main_ns =~ s{/+$}{};
+    $main_ns =~ s{/+}{/}g;
+    #TODO: support absolute and relative keys
+    $main_ns =~ s{^/*}{/};
 
     unless (defined $bootstrapped) { 
         #FIXME: we just need a proper caching and its invalidation
@@ -303,6 +327,11 @@ sub morph ($;$) {
         };
         while (@list) {
             my ($ns, $token) = splice @list, 0, 2;
+            $ns =~ s{/+}{/}g;
+            $ns =~ s{^/*}{/};
+            $ns =~ s{/+$}{}; 
+            # "a//b/c/ => "/a/b/c"
+            # "//" => ""
 
             my $patch = do {
                 next if $stack->{"$plugin\0$main_ns\0$token"};
@@ -311,35 +340,43 @@ sub morph ($;$) {
             };
 
             if (length $main_ns > length $ns) {
-                substr($main_ns, 0, length $ns) eq $ns or die "$plugin: list('$main_ns'): '$ns' => '$token'";
+                substr($main_ns, 0, 1 + length $ns) eq "$ns/" or die "$plugin: list('$main_ns'): '$ns' => '$token'";
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
                 $patch = adjust($patch, $delta);
             } else {
-                substr($ns, 0, length $main_ns) eq $main_ns or die "$plugin: list('$main_ns'): '$ns' => '$token'";
+                $main_ns eq $ns or substr($ns, 0, 1 + length $main_ns) eq "$main_ns/" or die "$plugin: list('$main_ns'): '$ns' => '$token'";
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;
             }
 
             $value = merge($value, $patch);
-            last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB'; #FIXME: actually merge now merges ARRAY and SCALAR into a GLOB
-        }
-    }
-    if ($type and ref $value eq "GLOB") {
-        if ($type eq '$') {
-            $value = ${*{$value}};
-        } elsif ($type eq '@') {
-            $value = *{$value}{ARRAY};
-        } elsif ($type eq '%') {
-            $value = *{$value}{HASH};
-        } else {
-            die "invalid type value '$type'"
+            # last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB'; 
+            # FIXME: actually merge now merges ARRAY and SCALAR into a GLOB. uncomment this when we get rid of globs completely
         }
     }
 
-    #use Yandex::Logger;
-    #DEBUG "$main_ns affects: ", join ", ", keys %$stack;
+    $type ||= "*";
+    if ($type eq '$') {
+        if (ref $value eq "GLOB") {
+            $value = ${*{$value}};
+        }
+    } elsif ($type eq '@') {
+        if (ref $value eq "GLOB") {
+            $value = *{$value}{ARRAY};
+        } elsif (ref $value ne "ARRAY") {
+            $value = undef;
+        }
+    } elsif ($type eq '%') {
+        if (ref $value eq "GLOB") {
+            $value = *{$value}{HASH};
+        } elsif (ref $value ne "HASH") {
+            $value = undef;
+        }
+    } elsif ($type ne '*') {
+        die "invalid type value '$type'"
+    }
 
     return $value;
 }

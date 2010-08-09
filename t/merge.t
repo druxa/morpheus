@@ -18,8 +18,8 @@ sub general : Test(2) {
     is_deeply(merge($v1, $p1), { a => 1, b => 2, c => 4 }, "basic test");
 
     my $v2 = { a => 1, b => { b1 => 2, b2 => 3 }, c => { c1 => 4 } };
-    my $p2 = { b => { b2 => 5, b3 => 6 }, c => 7 };
-    is_deeply(merge($v2, $p2), { a => 1, b => { b1 => 2, b2 => 3, b3 => 6 }, c => { c1 => 4 } }, "deeper recursion");
+    my $p2 = { b => { b2 => 5, b3 => 6 }, c => { c1 => 7, c2 => 8 } };
+    is_deeply(merge($v2, $p2), { a => 1, b => { b1 => 2, b2 => 3, b3 => 6 }, c => { c1 => 4, c2 => 8 } }, "deeper recursion");
 }
 
 sub immutability : Test(2) {
