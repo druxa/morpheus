@@ -1,11 +1,14 @@
 package Morpheus::Plugin::Simple;
 use strict;
 use warnings;
+use Morpheus -export => [qw(normalize)];
 
 sub new ($$) {
     my ($class, $data) = @_;
+    my $_data = $data;
+    $data = sub { $_data } unless ref $data eq "CODE";
     bless {
-        data => $data
+        data => $data,
     } => $class;
 }
 
@@ -18,7 +21,7 @@ sub get ($$) {
     die 'mystery' if $token;
 
     if (ref $self->{data} eq "CODE") {
-        $self->{data} = $self->{data}->();
+        $self->{data} = normalize($self->{data}->());
     }
 
     return $self->{data};

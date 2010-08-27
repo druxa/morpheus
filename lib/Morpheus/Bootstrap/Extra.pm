@@ -10,6 +10,10 @@ use Morpheus::Plugin::Core;
 
 use Morpheus::Plugin::Simple;
 
+use Morpheus -defaults => {
+    '/morpheus/plugin/file/options/file' => ['./etc', '/etc'],
+};
+
 sub new {
     return Morpheus::Plugin::Simple->new({
         "morpheus" => {
@@ -24,15 +28,11 @@ sub new {
                     priority => 30,
                     object => Morpheus::Plugin::File->new(),
                 },
-                FilePath => { #TODO: drop this plugin and configure Env plugin instead
-                    priority => 40,
-                    object => 'Morpheus::Plugin::File::Path',
-                },
 
-                DB => {
-                    priority => 50,
-                    object => Morpheus::Plugin::DB->new(),
-                },
+#                DB => {
+#                    priority => 50,
+#                    object => Morpheus::Plugin::DB->new(),
+#                },
 
                 Env => {
                     priority => 70,

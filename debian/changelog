@@ -1,3 +1,11 @@
+libmorpheus-perl (0.2.10) stable; urgency=low
+
+  * Morpheus::Key helper class
+  * File plugin more configurable
+  * a step to PPB specific metaconfiguration
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 27 Aug 2010 21:08:03 +0400
+
 libmorpheus-perl (0.2.9) stable; urgency=low
 
   * Plugin/Content: fix warnings

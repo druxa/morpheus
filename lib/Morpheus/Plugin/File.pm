@@ -3,7 +3,28 @@ use strict;
 
 use base qw(Morpheus::Plugin::Content);
 
+use Morpheus;
 use File::Find;
+use Params::Validate;
+
+sub new {
+    my $class = shift;
+    my $self = validate(@_, {
+        path => { default => sub { morph('/morpheus/plugin/file/options/path') } },
+        suffix => { default => qr/(?:\.(-?\d+))?\.(?:cfg|conf)$/ },
+    });
+
+    if (ref $self->{suffix} eq "Regexp") {
+        my $re = $self->{suffix};
+        $self->{suffix} = sub {
+            my $fname = shift;
+            $fname =~ s/$re// or return;
+            return ($fname, $1);
+        };
+    }
+
+    bless $self => $class;
+}
 
 sub content ($$) {
     my ($self, $file) = @_;
@@ -13,61 +34,47 @@ sub content ($$) {
     return $content;
 }
 
-sub _find_file ($$) {
-    my ($self, $ns) = @_;
-    my $config = $ns;
-    my $file;
-
-    for my $config_path (@{$self->{config_path}}) {
-        my @suffix = (qw(.cfg .conf));
-        for my $suffix (@suffix) {
-            $file = "$config_path/$config$suffix";
-            return $file if -e $file;
-        }
-    }
-    return;
-}
-
 sub list ($$) {
     my ($self, $main_ns) = @_;
     $main_ns =~ s{^/+}{};
 
-    unless ($self->{config_path}) {
-        $self->{config_path} = Morpheus::morph("/morpheus/plugin/file/options/path");
-        #FIXME: move these options to new() parameters to allow several File plugins coexist and be configured differently
-    }
-
-    return () unless $self->{config_path};
+    my $paths = $self->{path};
+    $paths = $paths->() if ref $paths eq "CODE";
+    return () unless $paths;
+    die unless ref $paths eq "ARRAY";
+    #FIXME: cache those paths?
+    
+    my $suffix = $self->{suffix};
 
     my @list;
-    for my $config_path (@{$self->{config_path}}) {
-        $config_path =~ s{/+$}{};
+    for my $path (@{$paths}) {
+        $path =~ s{/+$}{};
         my %list;
 
         my $process_file = sub ($;$) {
-            my ($full_file, $ns) = @_;
+            my ($full_file, $desired_ns) = @_;
             -f $full_file or return;
-            die 'mystery' unless $full_file =~ m{^\Q$config_path\E/(.*)};
+            die 'mystery' unless $full_file =~ m{^\Q$path\E/(.*)};
             my $file = $1;
-            return unless $file =~ s{(?:\.(-?\d+))?\.(?:cfg|conf)$}{}; #TODO: make the list of suffixes configurable
-            return if $ns and $file ne $ns;
-            push @{$list{$file}}, {
+            my ($ns, $priority) = $suffix->($file);
+            return if not $ns or $desired_ns and $ns ne $desired_ns;
+            push @{$list{$ns}}, {
                 file => $full_file,
-                priority => $1 || 0,
+                priority => $priority || 0,
             };
         };
 
-        if (-d "$config_path/$main_ns") {
+        if (-d "$path/$main_ns") {
             find({
                 no_chdir => 1,
                 follow_skip => 2,
                 wanted => sub { $process_file->($File::Find::name) },
-            }, "$config_path/$main_ns");
+            }, "$path/$main_ns");
         }
 
         my $ns = $main_ns;
         while ($ns) {
-            for my $file (glob ("$config_path/$ns*")) { # $ns.cfg or $ns.10.cfg but not $ns-blah.cfg
+            for my $file (glob ("$path/$ns*")) { # $ns.cfg or $ns.10.cfg but not $ns-blah.cfg
                 $process_file->($file, $ns);
             }
             $ns =~ s{/?[^/]+$}{};

@@ -70,13 +70,18 @@ sub import ($;@) {
 use Morpheus::Defaults;
 use Morpheus::Overrides;
 use Morpheus::Bootstrap;
+use Morpheus::Key;
+
+sub key {
+    Morpheus::Key->new($_[0]);
+}
 
 sub normalize ($) {
     my ($data) = @_;
     return $data unless ref $data eq "HASH";
     my $result = { %$data };
     for my $key ( keys %$data) {
-        my @keys = grep {$_} split m{/}, $key;
+        my @keys = @{key($key)};
         next if @keys == 1;
 
         my $value = delete $result->{$key};
@@ -92,7 +97,7 @@ sub normalize ($) {
 sub adjust ($$) {
     my ($value, $delta) = @_;
     return $value unless $delta;
-    for (split m{/+}, $delta) {
+    for (@{key($delta)}) {
         if (defined $value and ref $value eq "HASH") {
             $value = $value->{$_};
         } elsif (defined $value and ref $value eq "GLOB") {
@@ -284,12 +289,17 @@ our $stack = {};
 our $bootstrapped;
 our @plugins;
 
+require Data::Dump if $ENV{VERBOSE};
+our $indent = "";
+
 sub morph ($;$) {
     my ($main_ns, $type) = @_;
-    $main_ns =~ s{/+$}{};
-    $main_ns =~ s{/+}{/}g;
-    #TODO: support absolute and relative keys
-    $main_ns =~ s{^/*}{/};
+    $main_ns = key($main_ns);
+
+    local $indent = "$indent  ";
+    print "$indent morph($main_ns)\n" if $ENV{VERBOSE};
+
+
 
     unless (defined $bootstrapped) { 
         #FIXME: we just need a proper caching and its invalidation
@@ -302,15 +312,24 @@ sub morph ($;$) {
             },
         };
 
+        my $plugins_prev_set;
+        my $plugins_set = "";
         while () {
             local $bootstrapped = 0;
-            @plugins = map { $_->{object} } sort { $b->{priority} <=> $a->{priority} } grep { $_->{priority} } values %$plugins;
-            my $plugins_set = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            $plugins = morph("/morpheus/plugins", "%");
-            my $plugins_set_new = join ",", map { "$_:$plugins->{$_}->{priority}" } sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } grep { $plugins->{$_}->{priority} } keys %$plugins;
-            last if $plugins_set eq $plugins_set_new;
+
+            @plugins = 
+                map { { %{$plugins->{$_}}, name => $_ } } 
+                sort { $plugins->{$b}->{priority} <=> $plugins->{$a}->{priority} } 
+                grep { $plugins->{$_}->{priority} } keys %$plugins;
+
+            $plugins_prev_set = $plugins_set;
+            $plugins_set = join ",", map { "$_->{object}:$_->{priority}" } @plugins;
+            last if $plugins_set eq $plugins_prev_set;
             #FIXME: check if we hang
+
+            $plugins = morph("/morpheus/plugins", "%");
         }
+        print "plugins: ", join (", ", map { "$_->{name}:$_->{priority}" } @plugins), "\n" if $ENV{VERBOSE};
         $bootstrapped = 1;
     }
 
@@ -318,37 +337,49 @@ sub morph ($;$) {
     my $value;
 
     OUTER:
-    for my $plugin (@plugins) {
+    #for my $plugin (@plugins) {
+    
+    for (@plugins) {
+        my $plugin = $_->{object};
+        my $plugin_name = $_->{name};
+        #TODO: pass $prev_priority == $priority to merge!
 
+        print "  $indent * ${plugin_name}->list($main_ns)\n" if $ENV{VERBOSE};
         my @list = do {
-            next if $stack->{"$plugin\0$main_ns"};
+            if ($stack->{"$plugin\0$main_ns"}) {
+                print "  $indent - skipped\n" if $ENV{VERBOSE};
+                next;
+            }
             local $stack->{"$plugin\0$main_ns"} = 1;
             $plugin->list($main_ns);
         };
+        print "  $indent - done\n" if $ENV{VERBOSE};
+
         while (@list) {
             my ($ns, $token) = splice @list, 0, 2;
-            $ns =~ s{/+}{/}g;
-            $ns =~ s{^/*}{/};
-            $ns =~ s{/+$}{}; 
-            # "a//b/c/ => "/a/b/c"
-            # "//" => ""
+            $ns = key($ns);
 
+            print "  $indent * ${plugin_name}->get($token)\n" if $ENV{VERBOSE};
             my $patch = do {
-                next if $stack->{"$plugin\0$main_ns\0$token"};
+                if ($stack->{"$plugin\0$main_ns\0$token"}) {
+                    print "  $indent - skipped\n" if $ENV{VERBOSE};
+                    next;
+                }
                 local $stack->{"$plugin\0$main_ns\0$token"} = 1;
                 $plugin->get($token);
             };
+            print "  $indent - done\n" if $ENV{VERBOSE};
 
-            if (length $main_ns > length $ns) {
-                substr($main_ns, 0, 1 + length $ns) eq "$ns/" or die "$plugin: list('$main_ns'): '$ns' => '$token'";
+            if ($main_ns gt $ns) {
                 my $delta = substr($main_ns, length $ns);
                 $delta =~ s{^/}{};
                 $patch = adjust($patch, $delta);
-            } else {
-                $main_ns eq $ns or substr($ns, 0, 1 + length $main_ns) eq "$main_ns/" or die "$plugin: list('$main_ns'): '$ns' => '$token'";
+            } elsif ($main_ns le $ns) {
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
                 $patch = { $delta => $patch } if $delta;
+            } else {
+                die "$plugin: list('$main_ns'): '$ns' => '$token'"
             }
 
             $value = merge($value, $patch);
@@ -378,6 +409,7 @@ sub morph ($;$) {
         die "invalid type value '$type'"
     }
 
+    print "$indent returns ", Data::Dump::pp($value), "\n" if $ENV{VERBOSE};    
     return $value;
 }
 
