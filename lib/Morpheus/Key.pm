@@ -10,6 +10,9 @@ use overload
     '""' => sub { ${$_[0]} },
     '@{}' => \&parts;
 
+use parent qw(Exporter);
+our @EXPORT_OK = qw(key);
+
 sub new {
     my $class = shift;
     my $key = shift;
@@ -38,6 +41,10 @@ sub parts ($) {
     $key = "$key";
     $key =~ s{^/}{};
     return [split qr{/}, $key];
+}
+
+sub key {
+    __PACKAGE__->new($_[0]);
 }
 
 1;

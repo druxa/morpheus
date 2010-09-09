@@ -2,7 +2,7 @@ package Morpheus::Plugin::Content;
 # base class for plugins that evaluate user defined perl configs
 use strict;
 
-use Morpheus -export => [qw(normalize)];
+use Morpheus::Utils qw(normalize);
 use Digest::MD5 qw(md5_hex);
 use Symbol qw(delete_package);
 
@@ -84,9 +84,11 @@ sub _get ($$) {
         next unless $_;
         my $glob = \$stash->{$_};
         if (defined *{$glob}{HASH}) {
+            warn "\%$_ defined at $token\n";
             *{$glob} = normalize(*{$glob}{HASH});
             $value->{$_} = $glob;
         } elsif (defined *{$glob}{ARRAY}) {
+            warn "\@$_ defined at $token\n";
             $value->{$_} = $glob;
         } elsif (defined ${*{$glob}}) {
             $value->{$_} = normalize(${*{$glob}});

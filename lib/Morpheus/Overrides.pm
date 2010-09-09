@@ -1,6 +1,6 @@
 package Morpheus::Overrides;
 use strict;
-use Morpheus -export => [qw(merge normalize)];
+use Morpheus::Utils qw(merge normalize);
 
 our $cache = {};
 sub cache {

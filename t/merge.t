@@ -10,7 +10,7 @@ use Symbol;
 
 use lib 'lib';
 
-use Morpheus -export => [qw(merge)];
+use Morpheus::Utils qw(merge);
 
 sub general : Test(2) {
     my $v1 = { a => 1, b => 2 };

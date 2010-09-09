@@ -1,7 +1,7 @@
 package Morpheus::Plugin::Simple;
 use strict;
 use warnings;
-use Morpheus -export => [qw(normalize)];
+use Morpheus::Utils qw(normalize);
 
 sub new ($$) {
     my ($class, $data) = @_;
