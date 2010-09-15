@@ -4,5 +4,7 @@ test:
 	prove t/*.t
 
 install:
-	mkdir -p -m755 $(DESTDIR)/usr/share/perl5/
+	mkdir -p $(DESTDIR)/usr/share/perl5/
 	cp -r lib/* $(DESTDIR)/usr/share/perl5/
+	mkdir -p $(DESTDIR)/usr/bin/
+	cp bin/* $(DESTDIR)/usr/bin/

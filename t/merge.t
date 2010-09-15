@@ -32,7 +32,7 @@ sub immutability : Test(2) {
     is_deeply($p, $p_copy, "merge preserves patch");
 }
 
-sub globs : Test(4) {
+sub globs1 : Test(4) {
     my $v = gensym;
     %{*{$v}} = ( a => 1, b => 2 );
     ${*{$v}} = "text1";
@@ -47,4 +47,16 @@ sub globs : Test(4) {
     is(${*{$r}}, "text1", "scalar in glob");
 }
 
-__PACKAGE__->runtests;
+sub globs2 : Test(3) {
+    my $v = { a => "b" };
+    my $p = gensym;
+    %{*{$p}} = ( a => "c" );
+
+    my $r = merge($v, $p);
+    is(ref $r, "GLOB", "hash and glob merged into glob");
+    is_deeply(\%{*{$r}}, { a => "c" }, "hash in glob");
+    is_deeply(${*{$r}}, { a => "b" }, "scalar in glob");
+}
+
+
+__PACKAGE__->new->runtests;

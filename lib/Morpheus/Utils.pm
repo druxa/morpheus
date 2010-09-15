@@ -1,6 +1,10 @@
 package Morpheus::Utils;
 use strict;
 
+sub normalize ($);
+sub adjust ($$);
+sub merge ($$);
+
 use parent qw(Exporter);
 our @EXPORT = qw(normalize merge adjust);
 
@@ -65,10 +69,6 @@ sub merge ($$) {
             my $array = merge(*{$value}{ARRAY}, *{$patch}{ARRAY});
             *{$result} = $array if $array;
             ${*{$result}} = merge(${*{$value}}, ${*{$patch}});
-        } elsif ($ref_patch eq "HASH") {
-            *{$result} = merge(*{$value}{HASH}, $patch);
-        } elsif ($ref_patch eq "ARRAY") {
-            *{$result} = merge(*{$value}{ARRAY}, $patch);
         } else {
             ${*{$result}} = merge(${*{$value}}, $patch);
         }
@@ -78,28 +78,7 @@ sub merge ($$) {
     if ($ref_patch eq "GLOB") {
         my $result = gensym;
         *{$result} = *{$patch};
-        if ($ref_value eq "HASH") {
-            *{$result} = merge($value, *{$patch}{HASH});
-        } elsif ($ref_value eq "ARRAY") {
-            *{$result} = $value;
-        } else {
-            ${*{$result}} = $value;
-        }
-        return $result;
-    }
-
-    if ($ref_value ne $ref_patch) {
-        my $result = gensym;
-        if ($ref_value) {
-            *{$result} = $value;
-        } else {
-            ${*{$result}} = $value;
-        }
-        if ($ref_patch) {
-            *{$result} = $patch;
-        } else {
-            ${*{$result}} = $patch;
-        }
+        ${*{$result}} = merge($value, ${*{$patch}}); 
         return $result;
     }
 

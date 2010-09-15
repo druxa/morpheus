@@ -1,0 +1,68 @@
+#!/usr/bin/perl
+# vim: ft=perl
+
+=head1 NAME
+
+morph - Morpheus configuration tree dumper.
+
+=head1 SYNOPSIS
+
+    morph [--format={json|dumper|xml|tt2}] [--template=<tt2-template>] [--help] <--type={@|%|$}> key1 [key2, ...]
+
+=head1 SEE ALSO
+
+perldoc Morpheus
+
+=cut
+
+
+use strict;
+use Morpheus;
+
+use Getopt::Long;
+use Pod::Usage;
+
+my $format = "json";
+my $template;
+my $type;
+my $help;
+
+GetOptions(
+    "format:s" => \$format,
+    "template:s" => \$template,
+    "type:s" => \$type, # @|%|$
+    "help" => \$help,
+) or pod2usage(-verbose => 1, -exitval => 2);
+pod2usage(-verbose => 2, -exitval => 0) if $help;
+
+pod2usage(-verbose => 1, -exitval => 2, message => "--template is required for --format=tt2") if $format eq "tt2" and not $template;
+pod2usage(-verbose => 1, -exitval => 2, message => "unknown format '$format'") unless $format =~ /^(?:dumper|json|xml|tt2)$/;
+my @keys = @ARGV or pod2usage(-verbose => 1, -exitval => 2, message => "at least one 'key' is required");
+
+for my $key (@keys) {
+    my $morph = eval { morph($key, $type) };
+    if ($@) {
+        warn "$key: ", $@;
+        next;
+    }
+
+    if ($format eq "dumper") {
+        require Data::Dumper;
+        print Data::Dumper->new([])->Terse(1)->Values([$morph])->Dump();
+    } elsif ($format eq "json") {
+        require JSON;
+        print JSON::to_json($morph, { ascii => 1, pretty => 1 });
+    } elsif ($format eq "xml") {
+        require XML::Simple;
+        print XML::Simple::XMLout($morph, NoAttr => 1);
+    } elsif ($format eq "tt2") {
+        require Template;
+        my $tt = Template->new;
+        $tt->process($template, $morph);
+    } else {
+        die;
+    }
+}
+
+
+
