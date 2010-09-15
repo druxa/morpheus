@@ -32,12 +32,15 @@ Morpheus - the ultimate configuration engine
   morph("/foo/bar");
   morph("/foo/bar/x", "$");
   morph("/foo/bar/y", "@");
+  morph("/foo/bar/z", "%");
 
 =head1 DESCRIPTION
 
 Morph it!
 
 =cut
+
+our $VERSION = '{{DEBIAN_VERSION}}';
 
 sub import ($;@) {
     my $class = shift;
