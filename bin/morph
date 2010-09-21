@@ -57,8 +57,8 @@ for my $key (@keys) {
         print XML::Simple::XMLout($morph, NoAttr => 1);
     } elsif ($format eq "tt2") {
         require Template;
-        my $tt = Template->new;
-        $tt->process($template, $morph);
+        my $tt = Template->new(ABSOLUTE => 1);
+        $tt->process($template, $morph) or die $tt->error();
     } else {
         die;
     }

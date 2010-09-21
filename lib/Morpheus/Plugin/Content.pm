@@ -84,11 +84,11 @@ sub _get ($$) {
         next unless $_;
         my $glob = \$stash->{$_};
         if (defined *{$glob}{HASH}) {
-            warn "\%$_ defined at $token\n";
+            # warn "\%$_ defined at $token\n";
             *{$glob} = normalize(*{$glob}{HASH});
             $value->{$_} = $glob;
         } elsif (defined *{$glob}{ARRAY}) {
-            warn "\@$_ defined at $token\n";
+            # warn "\@$_ defined at $token\n";
             $value->{$_} = $glob;
         } elsif (defined ${*{$glob}}) {
             $value->{$_} = normalize(${*{$glob}});

@@ -1,3 +1,9 @@
+libmorpheus-perl (0.2.14) stable; urgency=low
+
+  * remove warnings on @/% in configs
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Tue, 21 Sep 2010 14:45:22 +0400
+
 libmorpheus-perl (0.2.13) stable; urgency=low
 
   * 'morph' console script to dump config in various formats 
