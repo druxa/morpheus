@@ -9,7 +9,7 @@ sub new {
         "morpheus" => {
             "plugins" => {
 
-                Extra => {
+                'Bootstrap::Extra' => {
                     priority => 0,
                     object => 0,
                 },

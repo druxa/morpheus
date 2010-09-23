@@ -16,10 +16,10 @@ sub new {
         for my $path (@INC) {
             for my $file (glob "$path/Morpheus/Bootstrap/*.pm") {
                 $file =~ m{/([^/]+)\.pm$} or die;
-                my $name = $1;
+                my $name = "Bootstrap::$1";
                 next if $loaded->{$name};
                 require $file;
-                my $object = "Morpheus::Bootstrap::$name";
+                my $object = "Morpheus::$name";
                 $object = $object->new() if $object->can('new');
                 $loaded->{$name} = {
                     priority => 300,
@@ -40,7 +40,7 @@ sub new {
         };
     });
 
-    $this->{object} = $that;
+    $this->{object} = $that; #FIXME: weaken?
 
     return $that;
 }

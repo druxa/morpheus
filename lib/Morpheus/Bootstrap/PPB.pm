@@ -12,7 +12,7 @@ sub new {
         "morpheus" => {
             "plugins" => {
 
-                PPB => { priority => 400 }, # boost myself
+                'Bootstrap::PPB' => { priority => 400 }, # boost myself
 
                 FilePath => {
                     priority => 40,

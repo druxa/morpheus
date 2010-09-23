@@ -206,7 +206,8 @@ sub morph ($;$) {
 
         my $plugins_prev_set;
         my $plugins_set = "";
-        while () {
+        for my $iteration (0 .. 42) {
+            die "bootstrap hangs" if $iteration == 42;
             local $bootstrapped = 0;
 
             @plugins = 
@@ -220,6 +221,7 @@ sub morph ($;$) {
             #FIXME: check if we hang
 
             $plugins = morph("/morpheus/plugins", "%");
+            
         }
         print "plugins: ", join (", ", map { "$_->{name}:$_->{priority}" } @plugins), "\n" if $ENV{VERBOSE};
         $bootstrapped = 1;

@@ -1,3 +1,10 @@
+libmorpheus-perl (0.2.15) stable; urgency=low
+
+  * give bootstrap plugins more distinguishing names
+  * limit bootstrap iterations
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Thu, 23 Sep 2010 20:33:30 +0400
+
 libmorpheus-perl (0.2.14) stable; urgency=low
 
   * remove warnings on @/% in configs
