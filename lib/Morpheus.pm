@@ -181,7 +181,7 @@ our $stack = {};
 our $bootstrapped;
 our @plugins;
 
-require Data::Dump if $ENV{VERBOSE};
+require Data::Dump if $ENV{MORPHEUS_VERBOSE};
 our $indent = "";
 
 sub morph ($;$) {
@@ -189,7 +189,7 @@ sub morph ($;$) {
     $main_ns = key($main_ns);
 
     local $indent = "$indent  ";
-    print "$indent morph($main_ns)\n" if $ENV{VERBOSE};
+    print "$indent morph($main_ns)\n" if $ENV{MORPHEUS_VERBOSE};
 
 
 
@@ -222,7 +222,7 @@ sub morph ($;$) {
 
             $plugins = morph("/morpheus/plugins");
         }
-        print "plugins: ", join (", ", map { "$_->{name}:$_->{priority}" } @plugins), "\n" if $ENV{VERBOSE};
+        print "plugins: ", join (", ", map { "$_->{name}:$_->{priority}" } @plugins), "\n" if $ENV{MORPHEUS_VERBOSE};
         $bootstrapped = 1;
     }
 
@@ -239,31 +239,31 @@ sub morph ($;$) {
         my $priority_equal = $prev_priority == $priority;
         $prev_priority = $priority;
 
-        print "  $indent * ${plugin_name}->list($main_ns)\n" if $ENV{VERBOSE};
+        print "  $indent * ${plugin_name}->list($main_ns)\n" if $ENV{MORPHEUS_VERBOSE};
         my @list = do {
             if ($stack->{"$plugin\0$main_ns"}) {
-                print "  $indent - skipped\n" if $ENV{VERBOSE};
+                print "  $indent - skipped\n" if $ENV{MORPHEUS_VERBOSE};
                 next;
             }
             local $stack->{"$plugin\0$main_ns"} = 1;
             $plugin->list($main_ns);
         };
-        print "  $indent - done\n" if $ENV{VERBOSE};
+        print "  $indent - done\n" if $ENV{MORPHEUS_VERBOSE};
 
         while (@list) {
             my ($ns, $token) = splice @list, 0, 2;
             $ns = key($ns);
 
-            print "  $indent * ${plugin_name}->get($token)\n" if $ENV{VERBOSE};
+            print "  $indent * ${plugin_name}->get($token)\n" if $ENV{MORPHEUS_VERBOSE};
             my $patch = do {
                 if ($stack->{"$plugin\0$main_ns\0$token"}) {
-                    print "  $indent - skipped\n" if $ENV{VERBOSE};
+                    print "  $indent - skipped\n" if $ENV{MORPHEUS_VERBOSE};
                     next;
                 }
                 local $stack->{"$plugin\0$main_ns\0$token"} = 1;
                 $plugin->get($token);
             };
-            print "  $indent - done\n" if $ENV{VERBOSE};
+            print "  $indent - done\n" if $ENV{MORPHEUS_VERBOSE};
 
             if ($main_ns gt $ns) {
                 my $delta = substr($main_ns, length $ns);
@@ -304,7 +304,7 @@ sub morph ($;$) {
         die "invalid type value '$type'"
     }
 
-    print "$indent returns ", Data::Dump::pp($value), "\n" if $ENV{VERBOSE};    
+    print "$indent returns ", Data::Dump::pp($value), "\n" if $ENV{MORPHEUS_VERBOSE};    
     return $value;
 }
 
