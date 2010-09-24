@@ -10,7 +10,7 @@ use Morpheus::Plugin::Core;
 use Morpheus::Plugin::Simple;
 
 use Morpheus -defaults => {
-    '/morpheus/plugin/file/options/path' => ['/usr/share/morpheus/'],
+    '/morpheus/plugin/file/options/path' => ['./etc/', '/etc/'],
 };
 
 sub new {
