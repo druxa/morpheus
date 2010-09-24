@@ -3,7 +3,7 @@ use strict;
 
 sub normalize ($);
 sub adjust ($$);
-sub merge ($$);
+sub merge ($$;$);
 
 use parent qw(Exporter);
 our @EXPORT = qw(normalize merge adjust);
@@ -45,8 +45,9 @@ sub adjust ($$) {
     return $value;
 }
 
-sub merge ($$) {
-    my ($value, $patch) = @_;
+sub merge ($$;$) {
+    my ($value, $patch, $die_on_collision) = @_;
+    #TODO: support $die_on_collision!
 
     return $patch unless defined $value;
     return $value unless defined $patch;

@@ -8,8 +8,9 @@ use Test::Exception;
 
 use lib 'lib';
 
+BEGIN{ $ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib' };
 use Morpheus -overrides => {
-    "morpheus/plugin/file/options" => { path => ["t/etc2/", "t/etc",] },
+    "morpheus/plugin/file/options/path" => ["t/etc2/", "t/etc"],
 };
 
 is(morph("test/file/stash/scalar"), 1, "File: scalars from stash");

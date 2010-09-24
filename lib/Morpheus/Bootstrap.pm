@@ -4,6 +4,22 @@ use warnings;
 
 use Morpheus::Plugin::Simple;
 
+our $BOOTSTRAP_PATH;
+$BOOTSTRAP_PATH = [@INC];
+@$BOOTSTRAP_PATH = split /[\s:]+/, $ENV{MORPHEUS_BOOTSTRAP_PATH} if defined $ENV{MORPHEUS_BOOTSTRAP_PATH};
+
+sub import {
+    my $class = shift;
+    while (@_) {
+        my $cmd = shift;
+        if ($cmd eq '-path') {
+            push @$BOOTSTRAP_PATH, @{(shift)};
+        } else {
+            die "unexpected option '$cmd'";
+        }
+    }
+}
+
 sub new {
 
     my $this = {
@@ -13,7 +29,8 @@ sub new {
     my $that = Morpheus::Plugin::Simple->new(sub {
 
         my $loaded = {};
-        for my $path (@INC) {
+
+        for my $path (@$BOOTSTRAP_PATH) {
             for my $file (glob "$path/Morpheus/Bootstrap/*.pm") {
                 $file =~ m{/([^/]+)\.pm$} or die;
                 my $name = "Bootstrap::$1";

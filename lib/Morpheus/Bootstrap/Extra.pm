@@ -11,7 +11,7 @@ use Morpheus::Plugin::Core;
 use Morpheus::Plugin::Simple;
 
 use Morpheus -defaults => {
-    '/morpheus/plugin/file/options/file' => ['./etc', '/etc'],
+    '/morpheus/plugin/file/options/path' => ['/usr/share/morpheus/'],
 };
 
 sub new {
@@ -28,11 +28,6 @@ sub new {
                     priority => 30,
                     object => Morpheus::Plugin::File->new(),
                 },
-
-#                DB => {
-#                    priority => 50,
-#                    object => Morpheus::Plugin::DB->new(),
-#                },
 
                 Env => {
                     priority => 70,

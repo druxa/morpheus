@@ -7,7 +7,7 @@ use Test::More tests => 6;
 use Test::Exception;
 
 use lib 'lib';
-$ENV{PERL5LIB} = 'lib';
+$ENV{PERL5LIB} = $ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
 my $use = 'use Morpheus -overrides => {"morpheus/plugin/file/options" => {path => ["t/etc/"] }};';
 my $env = 'use Morpheus; "cross/test" => { x4 => morph("cross/test/x1") + 1, x2 => 1 }';
 

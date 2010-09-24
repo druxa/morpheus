@@ -199,7 +199,7 @@ sub morph ($;$) {
 
         my $plugins = { 
             Bootstrap => {
-                priority => 1,
+                priority => 200,
                 object => Morpheus::Bootstrap->new(),
             },
         };
@@ -220,8 +220,7 @@ sub morph ($;$) {
             last if $plugins_set eq $plugins_prev_set;
             #FIXME: check if we hang
 
-            $plugins = morph("/morpheus/plugins", "%");
-            
+            $plugins = morph("/morpheus/plugins");
         }
         print "plugins: ", join (", ", map { "$_->{name}:$_->{priority}" } @plugins), "\n" if $ENV{VERBOSE};
         $bootstrapped = 1;
@@ -232,11 +231,13 @@ sub morph ($;$) {
 
     OUTER:
     #for my $plugin (@plugins) {
-    
+    my $prev_priority = 1000; 
     for (@plugins) {
-        my $plugin = $_->{object};
-        my $plugin_name = $_->{name};
-        #TODO: pass $prev_priority == $priority to merge!
+        my ($plugin, $plugin_name, $priority) = @{$_}{qw(object name priority)};
+        last if $priority <= 100 and $main_ns ge "/morpheus/plugins";
+
+        my $priority_equal = $prev_priority == $priority;
+        $prev_priority = $priority;
 
         print "  $indent * ${plugin_name}->list($main_ns)\n" if $ENV{VERBOSE};
         my @list = do {
@@ -276,7 +277,7 @@ sub morph ($;$) {
                 die "$plugin: list('$main_ns'): '$ns' => '$token'"
             }
 
-            $value = merge($value, $patch);
+            $value = merge($value, $patch, $priority_equal);
             # last OUTER if defined $value and ref $value ne 'HASH' and ref $value ne 'GLOB'; 
             # FIXME: actually merge now merges ARRAY and SCALAR into a GLOB. uncomment this when we get rid of globs completely
         }
