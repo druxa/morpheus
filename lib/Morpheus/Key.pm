@@ -1,5 +1,8 @@
 package Morpheus::Key;
 use strict;
+
+# ABSTRACT: class representing config key
+
 use overload
     'eq' => sub { @_ = upgrade(@_); ${$_[0]} eq ${$_[1]} },
     'lt' => \&less,

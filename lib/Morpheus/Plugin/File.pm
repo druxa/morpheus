@@ -1,6 +1,8 @@
 package Morpheus::Plugin::File;
 use strict;
 
+# ABSTRACT: plugin reading perl-based configs
+
 use base qw(Morpheus::Plugin::Content);
 
 use Morpheus;

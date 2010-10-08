@@ -2,6 +2,8 @@ package Morpheus::Bootstrap;
 use strict;
 use warnings;
 
+# ABSTRACT: initial morpheus plugin which loads all other plugins
+
 use Morpheus::Plugin::Simple;
 
 our $BOOTSTRAP_PATH;

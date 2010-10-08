@@ -1,6 +1,8 @@
 package Morpheus::Plugin::Env;
 use strict;
 
+# ABSTRACT: plugin which provides config values based on MORPHEUS env variable
+
 use base qw(Morpheus::Plugin::Content);
 
 sub list ($$) {

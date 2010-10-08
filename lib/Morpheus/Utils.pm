@@ -1,6 +1,8 @@
 package Morpheus::Utils;
 use strict;
 
+# ABSTRACT: some common functions which don't fit anywhere else
+
 sub normalize ($);
 sub adjust ($$);
 sub merge ($$;$);

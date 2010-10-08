@@ -1,6 +1,9 @@
 package Morpheus::Plugin::Simple;
 use strict;
 use warnings;
+
+# ABSTRACT: plugin for simple static configuration
+
 use Morpheus::Utils qw(normalize);
 
 sub new ($$) {

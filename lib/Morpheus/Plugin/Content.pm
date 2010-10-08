@@ -1,5 +1,7 @@
 package Morpheus::Plugin::Content;
-# base class for plugins that evaluate user defined perl configs
+
+# ABSTRACT: base class for plugins that evaluate user defined perl configs
+
 use strict;
 
 use Morpheus::Utils qw(normalize);

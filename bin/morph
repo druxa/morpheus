@@ -1,9 +1,9 @@
 #!/usr/bin/perl
 # vim: ft=perl
 
-=head1 NAME
+package morph;
 
-morph - Morpheus configuration tree dumper.
+# ABSTRACT: Morpheus configuration tree dumper.
 
 =head1 SYNOPSIS
 

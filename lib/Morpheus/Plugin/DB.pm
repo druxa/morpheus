@@ -1,6 +1,8 @@
 package Morpheus::Plugin::DB;
 use strict;
 
+# ABSTRACT: plugin reading configs from SQL DB
+
 use base qw(Morpheus::Plugin::Content);
 
 use DBI;

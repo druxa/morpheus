@@ -1,0 +1,5 @@
+Revision history for Morpheus
+
+{{$NEXT}}
+        * converted to Dist::Zilla
+        * a little bit of PODs

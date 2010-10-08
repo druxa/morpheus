@@ -1,5 +1,8 @@
 package Morpheus::Overrides;
 use strict;
+
+# ABSTRACT: plugin for overriding configuration from perl code
+
 use Morpheus::Utils qw(merge normalize);
 
 our $cache = {};

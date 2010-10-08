@@ -2,6 +2,8 @@ package Morpheus::Bootstrap::Vital;
 use strict;
 use warnings;
 
+# ABSTRACT: bootstrap enabling Overrides and Defaults functionality
+
 use Morpheus::Overrides;
 use Morpheus::Defaults;
 

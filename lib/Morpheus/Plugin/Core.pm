@@ -1,6 +1,8 @@
 package Morpheus::Plugin::Core;
 use strict;
 
+# ABSTRACT: plugin providing some core constants
+
 use Sys::Hostname;
 
 use Morpheus::Plugin::Simple;

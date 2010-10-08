@@ -2,8 +2,9 @@ package Morpheus::Bootstrap::Extra;
 use strict;
 use warnings;
 
+# ABSTRACT: extra plugins - Env and File
+
 use Morpheus::Plugin::Env;
-#use Morpheus::Plugin::DB;
 use Morpheus::Plugin::File;
 use Morpheus::Plugin::Core;
 

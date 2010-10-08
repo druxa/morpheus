@@ -3,9 +3,7 @@ use strict;
 sub morph ($;$);
 sub export ($$;$);
 
-=head1 NAME
-
-Morpheus - the ultimate configuration engine
+# ABSTRACT: the ultimate configuration engine
 
 =head1 SYNOPSIS
 
@@ -36,11 +34,12 @@ Morpheus - the ultimate configuration engine
 
 =head1 DESCRIPTION
 
-Morph it!
+Morpheus is a configuration engine that supports custom plugins. It allows any
+program that uses it to be configured and reconfigured at different layers
+like local configuration files, configuration database, environment, etc.
+The overall program configuration is merged altogether from all these sources.
 
 =cut
-
-our $VERSION = '{{DEBIAN_VERSION}}';
 
 sub import ($;@) {
     my $class = shift;
