@@ -6,7 +6,7 @@ ifndef PERL
 PERL = /usr/bin/perl
 endif
 
-TMP     =$(CURDIR)/debian/tmp
+TMP     =$(CURDIR)/debian/$(PACKAGE)
 
 build: debian/build-stamp
 debian/build-stamp:
@@ -45,7 +45,6 @@ binary-indep: build install
 	dh_installdirs
 	dh_installcron
 	dh_installlogrotate
-	dh_install --sourcedir=debian/tmp
 	dh_perl
 	dh_compress
 	dh_fixperms

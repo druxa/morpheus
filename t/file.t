@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 22;
+use Test::More tests => 23;
 use Test::Exception;
 
 use lib 'lib';
@@ -45,4 +45,6 @@ throws_ok(sub{ eval(q#package X; use Morpheus "test/file/collision" => [qw(%y)];
 is_deeply(morph("test/file/priority/check"), { map { ("x$_" => 1) } (1..12) }, "priority of files");
 
 lives_ok(sub { morph("test/file/name") }, "file lookup");
+
+ok(morph("test")->{file}, "normalize on list keys"); # actually a test of Morpheus.pm itself
 

@@ -271,7 +271,7 @@ sub morph ($;$) {
             } elsif ($main_ns le $ns) {
                 my $delta = substr($ns, length $main_ns);
                 $delta =~ s{^/}{};
-                $patch = { $delta => $patch } if $delta;
+                $patch = normalize({ $delta => $patch }) if $delta;
             } else {
                 die "$plugin: list('$main_ns'): '$ns' => '$token'"
             }

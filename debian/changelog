@@ -1,3 +1,9 @@
+libmorpheus-perl (0.32) stable; urgency=low
+
+  * fix a bug on deeply nested list keys normalization
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Tue, 02 Nov 2010 20:42:38 +0300
+
 libmorpheus-perl (0.31) stable; urgency=low
 
   * hostname_long 
