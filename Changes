@@ -1,5 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.32    Tue Nov 02, 2010
         * converted to Dist::Zilla
         * a little bit of PODs
