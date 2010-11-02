@@ -1,3 +1,9 @@
+libmorpheus-perl (0.31) stable; urgency=low
+
+  * hostname_long 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Wed, 13 Oct 2010 16:07:16 +0400
+
 libmorpheus-perl (0.30) stable; urgency=low
 
   * converted to Dist::Zilla
