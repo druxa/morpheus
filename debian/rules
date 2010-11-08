@@ -46,6 +46,7 @@ binary-indep: build install
 	dh_installcron
 	dh_installlogrotate
 	dh_perl
+	if [ -x /usr/bin/dh_perldeps ]; then dh_perldeps; fi
 	dh_compress
 	dh_fixperms
 	dh_installdeb
