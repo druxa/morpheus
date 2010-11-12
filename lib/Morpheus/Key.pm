@@ -13,7 +13,7 @@ use overload
     '""' => sub { ${$_[0]} },
     '@{}' => \&parts;
 
-use parent qw(Exporter);
+use base qw(Exporter);
 our @EXPORT_OK = qw(key);
 
 sub new {

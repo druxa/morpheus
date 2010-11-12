@@ -7,7 +7,7 @@ sub normalize ($);
 sub adjust ($$);
 sub merge ($$;$);
 
-use parent qw(Exporter);
+use base qw(Exporter);
 our @EXPORT = qw(normalize merge adjust);
 
 use Symbol qw(gensym);

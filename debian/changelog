@@ -1,3 +1,9 @@
+libmorpheus-perl (0.34) stable; urgency=low
+
+  * get rid of Sys::Hostname::Long and parent dependencies 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Fri, 12 Nov 2010 19:59:51 +0300
+
 libmorpheus-perl (0.33) stable; urgency=low
 
   * call dh_perldeps when possible

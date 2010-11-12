@@ -6,7 +6,6 @@ use warnings;
 
 use Morpheus::Plugin::Env;
 use Morpheus::Plugin::File;
-use Morpheus::Plugin::Core;
 
 use Morpheus::Plugin::Simple;
 
@@ -18,11 +17,6 @@ sub new {
     return Morpheus::Plugin::Simple->new({
         "morpheus" => {
             "plugins" => {
-
-                Core => {
-                    priority => 20,
-                    object => Morpheus::Plugin::Core->new(),
-                },
 
                 File => {
                     priority => 30,
