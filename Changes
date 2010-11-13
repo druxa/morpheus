@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.34    Sat Nov 13, 2010
         * call dh_perldeps when possible
         * get rid of Sys::Hostname::Long and parent dependencies
 
