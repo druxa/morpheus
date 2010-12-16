@@ -22,7 +22,7 @@ sub export ($$;$);
   };
 
   use Morpheus -export => [
-      qw(morph merge normalize export)
+      qw( morph merge normalize )
   ];
 
   use Morpheus; # only 'morph' function is exported by default
@@ -108,14 +108,34 @@ If you'll say C<-overrides> instead of C<-defaults>, on the contrary, your value
 This module provides several helper functions. They can be imported into your code like this:
 
   use Morpheus -export => [
-      qw(morph merge normalize export)
+      qw( morph merge normalize )
   ];
+
+If this C<-export> option is not specified, then only C<morph()> function will be imported.
 
 More about these functions L<below|/"FUNCTIONS">
 
 =head1 FUNCTIONS
 
-...
+These functions can be imported via C<-export> option.
+
+=over
+
+=item B<morph($key)>
+
+Get value by given key. This function is imported by default.
+
+=item B<normalize($data)>
+
+Expand data by replacing all keys containing C</> in their names with nested hashrefs.
+
+For example, C<< normalize({ "a/b/c" => "d" }) >> will return C<< { a => { b => { c => "d" } } } >>.
+
+=item B<< merge($value, $patch) >>
+
+Merge two configuration subtrees together, including all deeply nested substructures.
+
+=back
 
 =cut
 
