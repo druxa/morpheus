@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * normalize "/a//" to "a" (affects Morpheus::Defaults/Overrides etc.)
 
 0.34    Sat Nov 13, 2010
         * call dh_perldeps when possible

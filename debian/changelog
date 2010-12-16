@@ -1,3 +1,9 @@
+libmorpheus-perl (0.35) stable; urgency=low
+
+  * normalize "/a//" to "a" (affects Morpheus::Defaults/Overrides etc.)
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Thu, 16 Dec 2010 17:12:07 +0300
+
 libmorpheus-perl (0.34) stable; urgency=low
 
   * get rid of Sys::Hostname::Long and parent dependencies 

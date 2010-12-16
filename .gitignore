@@ -1,4 +1,4 @@
-/.debuild
+/debuild
 /Morpheus-*
 /.build
 /libmorpheus-perl*
