@@ -8,9 +8,9 @@ sub export ($$;$);
 =head1 SYNOPSIS
 
   use Morpheus "/foo/bar" => [
-      qw($V1 @V2 %V3 *V4),
-      "v5" => "$V5", "v6/a" => "$A", "v6/b" => "%B",
-      "v7" => [ "$C", "$D", "e" => "@E" ],
+      qw($V1 $V2 $V3),
+      "v5" => '$V5', "v6/a" => '$A',
+      "v7" => [ '$C', '$D', "e" => '$E' ],
   ]; 
 
   use Morpheus -defaults => {
@@ -22,22 +22,120 @@ sub export ($$;$);
   };
 
   use Morpheus -export => [
-      qw(morph merge normalize export)
+      qw( morph merge normalize )
   ];
 
-  use Morpheus;
+  use Morpheus; # only 'morph' function is exported by default
 
-  morph("/foo/bar");
-  morph("/foo/bar/x", "$");
-  morph("/foo/bar/y", "@");
-  morph("/foo/bar/z", "%");
+  $bar = morph("/foo/bar");
 
 =head1 DESCRIPTION
 
-Morpheus is a configuration engine that supports custom plugins. It allows any
-program that uses it to be configured and reconfigured at different layers
-like local configuration files, configuration database, environment, etc.
-The overall program configuration is merged altogether from all these sources.
+Morpheus is a configuration engine that completely separates config consumers from config providers.
+
+Consumers can obtain configuration values by using this module or L<morph> script.
+Configuration values are binded to various nodes in the global config tree, similar to virtual file system. Consumers can ask for any node or for any subtree.
+
+Providers are plugins which can populate configuration tree from any sources: local configuration files, configuration database, environment, etc.
+The overall program configuration is merged together from all data provided by plugins.
+
+=head1 CONFIGURATION TREE
+
+Every config value is binded to a key inside the global configuration tree. Keys use C</> as a separator of their parts, similar to usual filesystem conventions.
+
+Any value which is a hashref will become the subtree in the configuration tree and will be merged with other values if possible. For example, if one plugin provides C<< { foo => 5 } >> for C</blah> key, and another plugin provides C<< { bar => 6 } >> for C</blah> key, then C<morph("/blah")> will return C<< { foo => 5, bar => 6 } >>.
+
+Leading C</> in key name is optional, and C<morph("/foo")> and C<morph("foo")> are the same by now, but in the future some analog of C<chdir> may be implemented. So leading C</> is probably more compatible with future releases.
+
+=head1 IMPORT SYNTAX
+
+There are a lot of things which you can pass to C<use Morpheus>:
+
+=head2 Import to global variables
+
+This code will set your package's C<$X> variable to the value binded to C</foo/bar/X> key:
+
+  use Morpheus "/foo/bar" => [
+    '$X'
+  ];
+
+You can pass several variables in the list:
+
+  use Morpheus "/foo/bar" => [
+    qw( $X $Y $Z )
+  ];
+
+Import value to variable with the name different from key's last part:
+
+  use Morpheus "/foo/bar" => [
+    "X" => '$FOO_BAR_X',
+  ];
+
+Or go to the next level in configuration tree:
+
+  use Morpheus "/foo" => [
+    blah => '$FOO_BLAH',
+    bar => [ "X" => '$FOO_BAR_X' ],
+  ];
+
+=head2 Set defaults and override already defined values
+
+This code will set default values for C</foo/bar/x> and C</foo/bar/y>:
+
+  use Morpheus -defaults => {
+    "/foo/bar" => { x => 1, y => 2 },
+  };
+
+Since hashrefs and tree nodes are always equivalent in Morpheus, these following versions of code do the same thing too:
+
+  use Morpheus -defaults => {
+    "/foo" => { bar => { x => 1, y => 2 } },
+  };
+
+Or:
+
+  use Morpheus -defaults => {
+    "/foo/bar/x" => 1,
+    "/foo/bar/y" => 2,
+  };
+
+Values which are set in this fashion are only defaults and will be B<overriden> if any other plugins provide them too.
+
+If you'll say C<-overrides> instead of C<-defaults>, on the contrary, your values will B<override> any values provided by plugins.
+
+=head2 Import helper functions
+
+This module provides several helper functions. They can be imported into your code like this:
+
+  use Morpheus -export => [
+      qw( morph merge normalize )
+  ];
+
+If this C<-export> option is not specified, then only C<morph()> function will be imported.
+
+More about these functions L<below|/"FUNCTIONS">
+
+=head1 FUNCTIONS
+
+These functions can be imported via C<-export> option.
+
+=over
+
+=item B<morph($key)>
+
+Get value by given key. This function is imported by default.
+
+=item B<normalize($data)>
+
+Expand data by replacing all keys containing C</> in their names with nested hashrefs.
+
+For example, C<< normalize({ "a/b/c" => "d" }) >> will return C<< { a => { b => { c => "d" } } } >>.
+
+=item B<< merge($value, $patch) >>
+
+Merge two configuration subtrees together, including all deeply nested substructures.
+
+=back
 
 =cut
 
