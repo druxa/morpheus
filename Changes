@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.36    Sat Dec 18, 2010
         * documentation
         * normalize "/a//" to "a" (affects Morpheus::Defaults/Overrides etc.)
 
