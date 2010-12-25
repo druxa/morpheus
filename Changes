@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.37    Sat Dec 25, 2010
         * tests use proper perl binary (thanks to Andreas Koenig for noticing)
 
 0.36    Sat Dec 18, 2010
