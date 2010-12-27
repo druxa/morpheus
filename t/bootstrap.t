@@ -10,7 +10,8 @@ use Symbol;
 
 use Config;
 
-$ENV{PERL5LIB} = $ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
+$ENV{PERL5LIB} = defined $ENV{PERL5LIB} ? "lib:$ENV{PERL5LIB}" : "lib";
+$ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
 my $perl = $Config{perlpath};
 
 sub xqx {

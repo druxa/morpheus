@@ -9,10 +9,12 @@ use Test::Exception;
 use Config;
 
 use lib 'lib';
-$ENV{PERL5LIB} = $ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
+$ENV{PERL5LIB} = defined $ENV{PERL5LIB} ? "lib:$ENV{PERL5LIB}" : "lib";
+$ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
+my $perl = $Config{perlpath};
+
 my $use = 'use Morpheus -overrides => {"morpheus/plugin/file/options" => {path => ["t/etc/"] }};';
 my $env = 'use Morpheus; "cross/test" => { x4 => morph("cross/test/x1") + 1, x2 => 1 }';
-my $perl = $Config{perlpath};
 
 is(`MORPHEUS='$env' $perl -e '$use; print morph("cross/test/x1")'`, 1, 'cross: File value');
 is(`MORPHEUS='$env' $perl -e '$use; print morph("cross/test/x2")'`, 1, 'cross: Env value');

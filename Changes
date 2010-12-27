@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * tests append to PERL5LIB if PERL5LIB is already defined
 
 0.37    Sat Dec 25, 2010
         * tests use proper perl binary (thanks to Andreas Koenig for noticing)

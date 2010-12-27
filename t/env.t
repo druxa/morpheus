@@ -11,7 +11,8 @@ use Morpheus;
 
 use Config;
 
-$ENV{PERL5LIB} = 'lib';
+$ENV{PERL5LIB} = defined $ENV{PERL5LIB} ? "lib:$ENV{PERL5LIB}" : "lib";
+$ENV{MORPHEUS_BOOTSTRAP_PATH} = 'lib';
 my $perl = $Config{perlpath};
 
 is(scalar(`MORPHEUS='"env_test_x" => "y"' $perl -e 'use Morpheus; print morph("env_test_x")'`), "y", 'Env: simple test');
