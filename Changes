@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.37_01 Mon Dec 27, 2010
         * tests append to PERL5LIB if PERL5LIB is already defined
 
 0.37    Sat Dec 25, 2010
