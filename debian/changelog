@@ -1,3 +1,12 @@
+libmorpheus-perl (0.38) stable; urgency=low
+
+  * import syntax fixed for deeply nested parameters
+  * previous changes (not released as separate debian packages):
+   - documentation
+   - various test improvements
+
+ -- Vyacheslav Matjukhin (No comments) <mmcleric@yandex-team.ru>  Thu, 10 Mar 2011 00:58:20 +0300
+
 libmorpheus-perl (0.35) stable; urgency=low
 
   * normalize "/a//" to "a" (affects Morpheus::Defaults/Overrides etc.)

@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * import syntax fixed for deeply nested parameters
 
 0.37_01 Mon Dec 27, 2010
         * tests append to PERL5LIB if PERL5LIB is already defined

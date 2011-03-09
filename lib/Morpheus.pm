@@ -214,7 +214,7 @@ sub export ($$;$) {
         } else {
             $var = shift @$bindings;
             if (ref $var) {
-                export($package, $var, "$root$ns.");
+                export($package, $var, "$root$ns/");
                 next;
             } else {
                 $var =~ s/^(\?)// and $optional = $1;
