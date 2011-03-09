@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.38    Thu Mar 10, 2011
         * import syntax fixed for deeply nested parameters
 
 0.37_01 Mon Dec 27, 2010
