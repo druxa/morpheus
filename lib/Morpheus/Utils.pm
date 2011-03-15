@@ -95,5 +95,4 @@ sub merge ($$;$) {
     return $value;
 }
 
-
-
+1;

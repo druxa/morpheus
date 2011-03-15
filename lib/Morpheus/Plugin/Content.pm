@@ -238,8 +238,6 @@ sub content ($$) {
     die;
 }
 
-my %cache;
-
 sub _process ($$) {
     my ($self, $token) = @_;
     return if exists $self->{cache}->{$token};
