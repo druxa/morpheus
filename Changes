@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * allow 'morph' script to dump nonrefs in json mode
 
 0.38    Thu Mar 10, 2011
         * import syntax fixed for deeply nested parameters

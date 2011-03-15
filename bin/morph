@@ -51,7 +51,7 @@ for my $key (@keys) {
         print Data::Dumper->new([])->Terse(1)->Values([$morph])->Dump();
     } elsif ($format eq "json") {
         require JSON;
-        print JSON::to_json($morph, { ascii => 1, pretty => 1 });
+        print JSON::to_json($morph, { ascii => 1, pretty => 1, allow_nonref => 1 });
     } elsif ($format eq "xml") {
         require XML::Simple;
         print XML::Simple::XMLout($morph, NoAttr => 1);

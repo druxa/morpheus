@@ -1,3 +1,9 @@
+libmorpheus-perl (0.39) stable; urgency=low
+
+  * allow 'morph' script to dump nonrefs in json mode
+
+ -- Vyacheslav Matjukhin (No comments) <mmcleric@yandex-team.ru>  Tue, 15 Mar 2011 18:09:06 +0300
+
 libmorpheus-perl (0.38) stable; urgency=low
 
   * import syntax fixed for deeply nested parameters
