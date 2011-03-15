@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.39    Tue Mar 15, 2011
         * allow 'morph' script to dump nonrefs in json mode
 
 0.38    Thu Mar 10, 2011
