@@ -26,19 +26,16 @@ is(
 );
 
 $result = qx(bin/morph /foo/bar);
-is(
+like(
     $result,
-    "5\n",
+    qr/^(5|"5")\n$/,
     'morph without arguments prints json'
 );
 
 $result = qx(bin/morph --format=dumper /foo);
-is(
+like(
     $result,
-"{
-  'bar' => 5
-}
-",
+    qr/^\s*{\s*'bar'\s*=>\s*5\s*}\s*$/,
     'morph with dumper format'
 );
 

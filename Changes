@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * script.t test checks output of 'morph' script less strictly,
+        now compatible with modern Data::Dumper and JSON versions
 
 0.39    Tue Mar 15, 2011
         * allow 'morph' script to dump nonrefs in json mode
