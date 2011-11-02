@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.41    Wed Nov 02, 2011
         * limit max identifier length is sandbox package
 
 0.40    Sat May 21, 2011
