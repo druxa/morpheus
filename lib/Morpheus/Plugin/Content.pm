@@ -217,6 +217,7 @@ sub _package ($$) {
     my $md5_self = md5_hex("$self");
     my $md5 = md5_hex($token);
     $token =~ s/[^\w]/_/g;
+    $token = substr($token, 0, 64); # max identifier length is limited in perl
     return "Morpheus::Sandbox::${md5_self}::${token}_${md5}";
 }
 

@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * limit max identifier length is sandbox package
 
 0.40    Sat May 21, 2011
         * script.t test checks output of 'morph' script less strictly,

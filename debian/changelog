@@ -1,3 +1,9 @@
+libmorpheus-perl (0.41) stable; urgency=low
+
+  * limit max identifier length is sandbox package 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Wed, 02 Nov 2011 22:55:58 +0400
+
 libmorpheus-perl (0.39) stable; urgency=low
 
   * allow 'morph' script to dump nonrefs in json mode
