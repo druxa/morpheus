@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * skip #line pragma for non files
 
 0.41    Wed Nov 02, 2011
         * limit max identifier length is sandbox package

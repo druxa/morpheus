@@ -1,3 +1,9 @@
+libmorpheus-perl (0.42) stable; urgency=low
+
+  * skip #line pragma for non files
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Thu, 03 Nov 2011 20:18:56 +0400
+
 libmorpheus-perl (0.41) stable; urgency=low
 
   * limit max identifier length is sandbox package 

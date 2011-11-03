@@ -254,12 +254,15 @@ sub _process ($$) {
     # $X = 5;
     # $Y = morph("X") + 1; # 6 
     #############################
+    
+    my $pragma = "";
+    $pragma = qq{# line 1 "$token"} if $token =~ m{^[/\w\.\-]+$}; # looks like a file name
 
     my @eval = eval qq{
 no strict;
 no warnings;
 package $package;
-# line 1 "$token"
+$pragma
 $content
 };
     die if $@;
