@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.43    Wed Nov 16, 2011
         * fix bin/morph tests to run Config{perlpath} perl
 
 0.42    Mon Nov 07, 2011
