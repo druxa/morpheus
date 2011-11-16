@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * fix bin/morph tests to run Config{perlpath} perl
 
 0.42    Mon Nov 07, 2011
         * skip #line pragma for non files

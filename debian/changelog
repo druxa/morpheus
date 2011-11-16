@@ -1,3 +1,9 @@
+libmorpheus-perl (0.43) stable; urgency=low
+
+  * fix bin/morph tests to run Config{perlpath} perl 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Wed, 16 Nov 2011 19:58:51 +0400
+
 libmorpheus-perl (0.42) stable; urgency=low
 
   * skip #line pragma for non files

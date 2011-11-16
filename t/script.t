@@ -4,6 +4,8 @@ use strict;
 use warnings;
 
 use Test::More tests => 3;
+use Config;
+my $perl = $Config{perlpath};
 
 use lib 'lib';
 $ENV{PERL5LIB} = 'lib';
@@ -15,7 +17,7 @@ $ENV{MORPHEUS} = q@
 
 my $result;
 
-$result = qx(bin/morph /foo);
+$result = qx($perl bin/morph /foo);
 is(
     $result,
 '{
@@ -25,14 +27,14 @@ is(
     'morph without arguments prints json'
 );
 
-$result = qx(bin/morph /foo/bar);
+$result = qx($perl bin/morph /foo/bar);
 like(
     $result,
     qr/^(5|"5")\n$/,
     'morph without arguments prints json'
 );
 
-$result = qx(bin/morph --format=dumper /foo);
+$result = qx($perl bin/morph --format=dumper /foo);
 like(
     $result,
     qr/^\s*{\s*'bar'\s*=>\s*5\s*}\s*$/,
