@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.44    Wed Jun 20, 2012
         * don't package debian/ and debuild/ dirs
 
 0.43    Wed Nov 16, 2011
