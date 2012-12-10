@@ -1,6 +1,7 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+        * cyclic dependencies handling improved
 
 0.44    Wed Jun 20, 2012
         * don't package debian/ and debuild/ dirs
