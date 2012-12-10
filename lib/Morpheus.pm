@@ -280,6 +280,7 @@ our @plugins;
 
 require Data::Dump if $ENV{MORPHEUS_VERBOSE};
 our $indent = "";
+our $source = "";
 
 sub morph ($;$) {
     my ($main_ns, $type) = @_;
@@ -353,11 +354,12 @@ sub morph ($;$) {
 
             print "  $indent * ${plugin_name}->get($token)\n" if $ENV{MORPHEUS_VERBOSE};
             my $patch = do {
-                if ($stack->{"$plugin\0$main_ns\0$token"}) {
+                if ($stack->{"$plugin\0$source\0$main_ns\0$token"}) {
                     print "  $indent - skipped\n" if $ENV{MORPHEUS_VERBOSE};
                     next;
                 }
-                local $stack->{"$plugin\0$main_ns\0$token"} = 1;
+                local $stack->{"$plugin\0$source\0$main_ns\0$token"} = 1;
+                local $source = $main_ns;
                 $plugin->get($token);
             };
             print "  $indent - done\n" if $ENV{MORPHEUS_VERBOSE};

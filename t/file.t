@@ -48,3 +48,7 @@ lives_ok(sub { morph("test/file/name") }, "file lookup");
 
 ok(morph("test")->{file}, "normalize on list keys"); # actually a test of Morpheus.pm itself
 
+is(morph("cycle/X/X"), 1, "cycled X = 1");
+is(morph("cycle/X/S"), 1, "cycled S from X = 1");
+is(morph("cycle/X/D"), 1, "cycled D from X throgh Y = 1");
+is(morph("cycle/X/Z"), 15, "perpetum cycle with Z = 15");
