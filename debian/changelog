@@ -1,3 +1,9 @@
+libmorpheus-perl (0.46) stable; urgency=low
+
+  * fix t/file.t 
+
+ -- Andrei Mishchenko <druxa@yandex-team.ru>  Mon, 10 Dec 2012 17:17:16 +0400
+
 libmorpheus-perl (0.45) stable; urgency=low
 
   * cyclic dependencies handling improved 

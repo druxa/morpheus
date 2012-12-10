@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-use Test::More tests => 23;
+use Test::More tests => 27;
 use Test::Exception;
 
 use lib 'lib';
