@@ -1,6 +1,8 @@
 Revision history for Morpheus
 
 {{$NEXT}}
+
+0.45    Mon Dec 10, 2012
         * cyclic dependencies handling improved
 
 0.44    Wed Jun 20, 2012
